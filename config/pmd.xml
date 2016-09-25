@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<ruleset name="Custom ruleset"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+    <description>
+        Diese Datei bindet alle PMD Regeln des SoPra ein.
+    </description>
+
+    <!-- basic rules -->
+    <rule ref="rulesets/java/basic.xml">
+        <!-- usually style preference -->
+        <exclude name="ForLoopShouldBeWhileLoop"/>
+        <!-- sometimes this makes the code clearer -->
+        <exclude name="CollapsibleIfStatements"/>
+        <!-- for debugging purposes and lambda wrappers -->
+        <exclude name="DontCallThreadRun"/>
+    </rule>
+
+    <!-- empty code is evil -->
+    <rule ref="rulesets/java/empty.xml"/>
+
+    <!-- design related code style-->
+    <rule ref="rulesets/java/design.xml">
+        <!-- static methods are sometimes useful for performance reasons -->
+        <exclude name="UseUtilityClass"/>
+        <!-- sometimes this can make the code clearer -->
+        <exclude name="SimplifyBooleanReturns"/>
+        <!-- sometimes okay -->
+        <exclude name="AvoidReassigningParameters"/>
+        <!-- sometimes useful and harmless in small scope -->
+        <exclude name="AccessorClassGeneration"/>
+        <!-- this might enforce a default label, which we didn't want -->
+        <exclude name="DefaultLabelNotLastInSwitchStmt"/>
+        <!-- sometimes this is simply not true (e.g. http://shipilev.net/blog/2016/arrays-wisdom-ancients/) -->
+        <exclude name="OptimizableToArrayCall"/>
+        <!-- sometimes this provides more clarity -->
+        <exclude name="ConfusingTernary"/>
+        <!-- false positives would be too risky -->
+        <exclude name="ImmutableField"/>
+        <!-- we don't use locales here -->
+        <exclude name="UseLocaleWithCaseConversions"/>
+        <!-- sometimes fallthrough is intentional -->
+        <exclude name="MissingBreakInSwitch"/>
+        <!-- sometimes this is indeed wanted -->
+        <exclude name="CompareObjectsWithEquals"/>
+        <!-- allow empty private constructors -->
+        <exclude name="UncommentedEmptyConstructor"/>
+        <!-- unlikely to be a problem -->
+        <exclude name="UnsynchronizedStaticDateFormatter"/>
+        <!-- let's think about library aware subclassing some other day -->
+        <exclude name="ClassWithOnlyPrivateConstructorsShouldBeFinal"/>
+        <!-- too strict for the development stage -->
+        <exclude name="SingularField"/>
+        <!-- sometimes we just want a switch -->
+        <exclude name="TooFewBranchesForASwitchStatement"/>
+        <!-- can sometimes lead to clearer code -->
+        <exclude name="LogicInversion"/>
+        <!-- style preference, and there are unsafe varargs with generics -->
+        <exclude name="UseVarargs"/>
+        <!-- clashes with reflection (e.g. JCommander) -->
+        <exclude name="FinalFieldCouldBeStatic"/>
+        <!-- unfortunately, the configuration is not flexible enough to ignore visitors -->
+        <exclude name="GodClass"/>
+        <!-- sometimes the default implementation is just empty. -->
+        <exclude name="EmptyMethodInAbstractClassShouldBeAbstract" />
+    </rule>
+
+    <!-- allow up to 3 levels of nesting of ifs (sometimes useful for logging and debugging) -->
+    <rule ref="rulesets/java/design.xml/AvoidDeeplyNestedIfStmts">
+        <properties>
+            <property name="problemDepth" value="4"/>
+        </properties>
+    </rule>
+
+    <!-- prohibit the use of old crap -->
+    <rule ref="rulesets/java/migrating.xml"/>
+
+    <!-- some important naming conventions -->
+    <rule ref="rulesets/java/naming.xml/ClassNamingConventions"/>
+    <rule ref="rulesets/java/naming.xml/AvoidDollarSigns"/>
+    <rule ref="rulesets/java/naming.xml/MethodWithSameNameAsEnclosingClass"/>
+    <rule ref="rulesets/java/naming.xml/SuspiciousHashcodeMethodName"/>
+    <rule ref="rulesets/java/naming.xml/SuspiciousEqualsMethodName"/>
+    <rule ref="rulesets/java/naming.xml/AvoidFieldNameMatchingTypeName"/>
+    <rule ref="rulesets/java/naming.xml/NoPackage"/>
+    <rule ref="rulesets/java/naming.xml/PackageCase"/>
+
+    <!-- exceptions -->
+    <rule ref="rulesets/java/strictexception.xml"/>
+
+    <!-- strings -->
+    <rule ref="rulesets/java/strings.xml/StringInstantiation"/>
+    <rule ref="rulesets/java/strings.xml/StringToString"/>
+    <rule ref="rulesets/java/strings.xml/UnnecessaryCaseChange"/>
+    <rule ref="rulesets/java/strings.xml/UseStringBufferLength"/>
+    <rule ref="rulesets/java/strings.xml/UselessStringValueOf"/>
+    <rule ref="rulesets/java/strings.xml/StringBufferInstantiationWithChar"/>
+    <rule ref="rulesets/java/strings.xml/UseEqualsToCompareStrings"/>
+
+    <!-- unnecessary -->
+    <rule ref="rulesets/java/unnecessary.xml/UselessOperationOnImmutable"/>
+
+</ruleset>
