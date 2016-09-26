@@ -1,22 +1,11 @@
-# AI Project
+# KI Projekt
+Dieses Repository beinhaltet Ihre KI Implementierung. Bitte achten Sie darauf die Auflagen für das Kommandozeileninterface einzuhalten.
 
-## Changing the build configuration
-This repository contains a gradle build configuration which you will use for the develeopment of your sopra project.
-You are not allowed to change the files that are part of the build configuration. This includes the files contained in the `config` directory and the main build script called `build.gradle`. The `Main.java` file can be changed but the
- package and name must be left intact and the `main()` method must be the entry point of your server implementation.
+## Ändern der vorgegebenen Dateien
+Es gelten die gleichen Richtlinien wie für Ihr Gruppenprojekt.
 
-## Building your project
-To build your project you first need to install the build system `gradle`. Further information can be found here: https://gradle.org/gradle-download/.
-After installation the project build can be started using the command
-```
-gradle build
-```
-This will gather all dependencies, compile the projects source code, execute the test cases, perform analysis jobs such as PMD and findbugs and finally bundle all project resources. The resulting `.jar` file is located in `build/libs`.
+## Wiederverwenden der Gruppen Implementierung
+Das vorgegebene Buildskript wird die Implementierung Ihrer Gruppe als Abhängigkeit herunterladen und für Sie einbinden. Sie können also die Klassen aus der Serverimplementierung wiederverwenden. Bitte kopieren Sie keinen Code aus dem Repository Ihrer Gruppe in dieses KI Repository.
 
-## Project reports
-The build configuration contains several analysis tools. These tools generate reports in `html` format, which can be found in `build/reports/$reportname`. The following reports are currently enabled:
-
-* pmd: Analysis of code quality
-* findbugs: Detection for commons sources of software faults
-* testResults: Detailed report for passing and failing test cases
-* jacoco: Coverage data of the executed test cases
+## Arbeiten mit Merge-Requests
+Ab Mittwoch den 28. September werden wir die Gruppen Repositories einfrieren. Ab dann müssen Sie das Merge-Request Verfahren verwenden um Änderungen an Ihrem Gruppenprojekt vorzunehmen. Für mehr Informationen gibt es hier ein gutes Tutorial: https://www.sgalinski.de/news/technik/gitlab-merge-requests-einfach-erklaert
