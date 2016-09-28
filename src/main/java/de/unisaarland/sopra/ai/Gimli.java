@@ -73,17 +73,16 @@ public class Gimli extends Player {
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		//first look, if must go on healing field
 		healingFields = model.getActiveHealingFields();
-		System.out.println("\nhealingFieldSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS: " + healingFields + "\n");
 		Position healingField = closestHealingField();
-		System.out.println("\nhealingField: " + healingField + "\n");
-		
+		if(closestHealingField().equals(myMonster.getPosition()) && myMonster.getHealth() <= 80) {
+			return null;
+		}
 		if (healingField != null) {
 			Action goToHeal = goToHealingField(healingField);
 			if (goToHeal != null) {
 				return goToHeal;
 			}
 		}
-
 		//second, may i attack?
 		Action doIt = getEnemyAttack();
 		if (doIt != null) {
@@ -102,6 +101,9 @@ public class Gimli extends Player {
 		//move to the enemy
 		return getBestMove(model.getMonster(enemyId).getPosition());
 	}
+
+
+
 
 	/**
 	 * returns an attack, if i may attack the enemy
@@ -184,7 +186,6 @@ public class Gimli extends Player {
 	 * @return moveAction to nearest healing field
 	 */
 	private Action goToHealingField(Position nearestHealingField) {
-		System.out.println("\nnearestHealingField in gotTOHEALINGFIELD!!!!!!!!!!!!!!!!!: " + nearestHealingField + "\n");
 		int myMonstersHealth = myMonster.getHealth();
 		int enemiesHealth = model.getHealth(enemyId);
 		int myMonstersEnergy = myMonster.getEnergy();
@@ -192,8 +193,8 @@ public class Gimli extends Player {
 		//if the onwn health is under 33, go to healingField
 		//if the enemy has 9 live more, go to healing field and more energy, or if the enemy has 22 life more
 		//if the enemy is on bushfield, go to healing field
-		if (enemiesHealth - myMonstersHealth < 30 || myMonstersHealth < 33
-				|| (enemiesHealth - myMonstersHealth < 22 && enemiesEnergy > myMonstersEnergy)
+		if (enemiesHealth > myMonstersHealth + 30 || myMonstersHealth < 33
+				|| ((enemiesHealth > myMonstersHealth + 22) && (enemiesEnergy > myMonstersEnergy))
 				|| model.getField(model.getMonster(enemyId).getPosition()) instanceof BushField) {
 			return getBestMove(nearestHealingField);
 		}
