@@ -1,10 +1,7 @@
 package de.unisaarland.sopra.ai;
 
 import de.unisaarland.sopra.Direction;
-import de.unisaarland.sopra.actions.Action;
-import de.unisaarland.sopra.actions.Attack;
-import de.unisaarland.sopra.actions.MoveAction;
-import de.unisaarland.sopra.actions.StabAttack;
+import de.unisaarland.sopra.actions.*;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
@@ -26,7 +23,7 @@ import java.util.Set;
  * <p>
  * project Anti
  */
-public class IrishAlcoholobold extends Player {
+public class Pumuckl extends Player {
 
 	private Monster myMonster;
 	private Set<Position> bushFields = new HashSet<>();
@@ -55,7 +52,7 @@ public class IrishAlcoholobold extends Player {
 	 *
 	 * @param model the model we need
 	 */
-	public IrishAlcoholobold(Model model) {
+	public Pumuckl(Model model) {
 		super(model);
 	}
 
@@ -65,29 +62,22 @@ public class IrishAlcoholobold extends Player {
 		this.myMonster = getModel().getMonster(getActorId());
 		System.out.println("myMonster: " + myMonster);
 		List<Monster> monsters = model.getMonsters();
-		System.out.println("Monsters: " + monsters);
 		for (Monster monster : monsters) {
 			if (monster.getId() != getActorId()) {
 				enemyId = monster.getId();
 				break;
 			}
 		}
-		System.out.println("enemyID: " + enemyId);
 		//the current distance to the enemy
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
-		System.out.println("distanceToEnemy: " + distanceToEnemy);
 		//first look, if must go on healing field
 		healingFields = model.getActiveHealingFields();
 		Position healingField = closestHealingField();
-		System.out.println("closestHealingField: " + healingField);
 		if (closestHealingField() != null) {
-			if (closestHealingField().equals(myMonster.getPosition()) && myMonster.getHealth() <= 80) {
-				Action doIt = getEnemyAttack();
-				System.out.println("attackToThE enemy: " + doIt);
-				return doIt;
+			if ((closestHealingField().equals(myMonster.getPosition())) && (myMonster.getHealth() < 80)) {
+				return getEnemyAttack();
 			}
 		}
-		System.out.println("isdoch null und ich ein idiot: ");
 		if (myMonster.getHealth() < 70) {
 			if (healingField != null) {
 				Action goToHeal = goToHealingField(healingField);
@@ -98,20 +88,28 @@ public class IrishAlcoholobold extends Player {
 		}
 		//second, may i attack?
 		Action doIt = getEnemyAttack();
-		System.out.println("attackToThE enemy: " + doIt);
 		if (doIt != null) {
+			//if if i can attack, but have less than 250 energy, move one adverse field
+			if (myMonster.getEnergy() <= 250) {
+
+				ActionVisitorAi visitor = new ActionVisitorAi();
+				Direction direction = doIt.accept(visitor);
+				return getMoveToAdverseDirection(direction);
+
+			}
 			return doIt;
+		}
+		if (myMonster.getEnergy() <= 150) {
+			return null;
 		}
 		//move to the bushfield
 		Position nearestBushField = closestBushToEnemy();
-		System.out.println("nearestBushFIELED: " + nearestBushField);
 		if (nearestBushField != null) {
 			if (distanceToEnemy < 6) {
 				return getBestMove(nearestBushField);
 			}
 		}
 		//move to the enemy
-		System.out.println("getBestMove : ");
 		return getBestMove(model.getMonster(enemyId).getPosition());
 	}
 
@@ -248,6 +246,94 @@ public class IrishAlcoholobold extends Player {
 		}
 		return nearest;
 	}
+
+
+	/**
+	 * long, but simple method to get a movement to the adverse direction
+	 *
+	 * @param direction the direction where i need the adverse
+	 * @return adverse direction
+	 */
+	private Action getMoveToAdverseDirection(Direction direction) {
+		switch (direction) {
+			case EAST:
+				if (new MoveAction(Direction.WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.WEST);
+				}
+				if (new MoveAction(Direction.NORTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_WEST);
+				}
+				if (new MoveAction(Direction.SOUTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_WEST);
+				}
+
+			case NORTH_EAST:
+				if (new MoveAction(Direction.SOUTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_WEST);
+				}
+				if (new MoveAction(Direction.WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.WEST);
+				}
+				if (new MoveAction(Direction.SOUTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_EAST);
+				}
+
+			case NORTH_WEST:
+				if (new MoveAction(Direction.SOUTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_EAST);
+				}
+				if (new MoveAction(Direction.EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.EAST);
+				}
+				if (new MoveAction(Direction.SOUTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_WEST);
+				}
+
+			case WEST:
+				if (new MoveAction(Direction.EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.EAST);
+				}
+				if (new MoveAction(Direction.NORTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_EAST);
+				}
+				if (new MoveAction(Direction.SOUTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.SOUTH_EAST);
+				}
+
+			case SOUTH_WEST:
+				if (new MoveAction(Direction.NORTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_EAST);
+				}
+				if (new MoveAction(Direction.NORTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_WEST);
+				}
+				if (new MoveAction(Direction.EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.EAST);
+				}
+
+			case SOUTH_EAST:
+				if (new MoveAction(Direction.NORTH_WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_WEST);
+				}
+				if (new MoveAction(Direction.WEST).validate(model, myMonster)) {
+					return new MoveAction(Direction.WEST);
+				}
+				if (new MoveAction(Direction.NORTH_EAST).validate(model, myMonster)) {
+					return new MoveAction(Direction.NORTH_EAST);
+				}
+
+			default:
+				return null;
+		}
+	}
+
+
+	private int minimalMoveCost() {
+		return 0;
+	}
+
+
+	// TODO: 29.09.16 do not rest on fire
 }
 
 

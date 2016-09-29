@@ -21,7 +21,7 @@ public final class Main {
 
             @Override
             public Player create(Model model) {
-                return new Gimli(model);
+                return new Pumuckl(model);
             }
         });
         de.unisaarland.sopra.Main.main(args);
