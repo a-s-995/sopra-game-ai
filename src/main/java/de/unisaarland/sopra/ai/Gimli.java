@@ -15,6 +15,7 @@ import de.unisaarland.sopra.view.Player;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -24,7 +25,6 @@ import java.util.Set;
  * <p>
  * project Anti
  */
-// TODO: 27.09.16 verändere ich das model???
 public class Gimli extends Player {
 
 	private Monster myMonster;
@@ -62,47 +62,55 @@ public class Gimli extends Player {
 	public Action act() {
 		//i need the id of the enemy
 		this.myMonster = getModel().getMonster(getActorId());
+		System.out.println("myMonster: " + myMonster);
 		List<Monster> monsters = model.getMonsters();
+		System.out.println("Monsters: " + monsters);
 		for (Monster monster : monsters) {
 			if (monster.getId() != getActorId()) {
 				enemyId = monster.getId();
 				break;
 			}
 		}
+		System.out.println("enemyID: " + enemyId);
 		//the current distance to the enemy
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
+		System.out.println("distanceToEnemy: " + distanceToEnemy);
 		//first look, if must go on healing field
 		healingFields = model.getActiveHealingFields();
 		Position healingField = closestHealingField();
-		if(closestHealingField().equals(myMonster.getPosition()) && myMonster.getHealth() <= 80) {
-			return null;
+		System.out.println("closestHealingField: " + healingField);
+		if(closestHealingField() != null) {
+			if (closestHealingField().equals(myMonster.getPosition()) && myMonster.getHealth() <= 80) {
+				return null;
+			}
 		}
-		if (healingField != null) {
-			Action goToHeal = goToHealingField(healingField);
-			if (goToHeal != null) {
-				return goToHeal;
+		System.out.println("isdoch null und ich ein idiot: " );
+		if (myMonster.getHealth() < 70) {
+			if (healingField != null) {
+				Action goToHeal = goToHealingField(healingField);
+				if (goToHeal != null) {
+					return goToHeal;
+				}
 			}
 		}
 		//second, may i attack?
 		Action doIt = getEnemyAttack();
+		System.out.println("attackToThE enemy: " + doIt);
 		if (doIt != null) {
 			return doIt;
 		}
 		//move to the bushfield
-		if (closestBushToEnemy() != null) {
+		Position nearestBushField = closestBushToEnemy();
+		System.out.println("nearestBushFIELED: " + nearestBushField);
+		if (nearestBushField != null) {
 			if (distanceToEnemy < 6) {
-				Position nearestBushField = closestBushToEnemy();
-				if (nearestBushField != null) {
-					//// TODO: 27.09.16 check more efficient if null, maybe returns null
-					return getBestMove(nearestBushField);
-				}
+				return getBestMove(nearestBushField);
 			}
 		}
 		//move to the enemy
+		System.out.println("getBestMove : ");
 		return getBestMove(model.getMonster(enemyId).getPosition());
 	}
-
-
 
 
 	/**
@@ -167,14 +175,15 @@ public class Gimli extends Player {
 				}
 			}
 		}
-		//// TODO: 28.09.16 random verwenden, nicht den ersten move!!
+		Random random = new Random();
 		//just go in this if Statement, if the method is called to move to the enemy
 		if (oldDistance == distanceToEnemy) {
 			if (myMonster.getEnergy() == 1000) {
 				Action[] possibleMoves = myMonster.planMoves(model).toArray(new Action[0]);
-				if (possibleMoves.length >= 1) {
-					return possibleMoves[0];
+				if (possibleMoves.length == 0) {
+					return null;
 				}
+				return possibleMoves[random.nextInt(possibleMoves.length)];
 			}
 		}
 		return null;
@@ -201,14 +210,19 @@ public class Gimli extends Player {
 		return null;
 	}
 
-	//// TODO: 27.09.16 not just take distance to enemy, take the distance of bushfield to myMonster AND enemy
+	/**
+	 * returns the closest bushfield, that has a distance less than 6 to myMonster and the enemy
+	 *
+	 * @return the closest bushfield between the 2 monsters
+	 */
 	private Position closestBushToEnemy() {
 		bushes();
 		Position nearest = null;
 		//the initial distance, the bushField has to have at least the same distance
-		int distance = 7;
+		int distance = 6;
 		for (Position position : bushFields) {
-			if (position.getDistanceTo(model.getMonster(enemyId).getPosition()) <= distance) {
+			if (position.getDistanceTo(model.getMonster(enemyId).getPosition()) <= distance
+					&& position.getDistanceTo(myMonster.getPosition()) < distance) {
 				distance = position.getDistanceTo(model.getMonster(enemyId).getPosition());
 				nearest = position;
 			}
@@ -224,8 +238,8 @@ public class Gimli extends Player {
 		Position nearest = null;
 		int distance = 10;
 		for (Position position : healingFields) {
-			if (position.getDistanceTo(model.getMonster(enemyId).getPosition()) < distance) {
-				distance = position.getDistanceTo(model.getMonster(enemyId).getPosition());
+			if (position.getDistanceTo(model.getMonster(getActorId()).getPosition()) < distance) {
+				distance = position.getDistanceTo(model.getMonster(getActorId()).getPosition());
 				nearest = position;
 			}
 		}
