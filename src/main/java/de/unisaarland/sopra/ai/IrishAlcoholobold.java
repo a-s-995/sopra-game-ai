@@ -10,6 +10,7 @@ import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
 import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
+import de.unisaarland.sopra.model.fields.WaterField;
 import de.unisaarland.sopra.view.Player;
 
 import java.util.Collection;
@@ -25,7 +26,7 @@ import java.util.Set;
  * <p>
  * project Anti
  */
-public class Gimli extends Player {
+public class IrishAlcoholobold extends Player {
 
 	private Monster myMonster;
 	private Set<Position> bushFields = new HashSet<>();
@@ -54,7 +55,7 @@ public class Gimli extends Player {
 	 *
 	 * @param model the model we need
 	 */
-	public Gimli(Model model) {
+	public IrishAlcoholobold(Model model) {
 		super(model);
 	}
 
@@ -79,12 +80,14 @@ public class Gimli extends Player {
 		healingFields = model.getActiveHealingFields();
 		Position healingField = closestHealingField();
 		System.out.println("closestHealingField: " + healingField);
-		if(closestHealingField() != null) {
+		if (closestHealingField() != null) {
 			if (closestHealingField().equals(myMonster.getPosition()) && myMonster.getHealth() <= 80) {
-				return null;
+				Action doIt = getEnemyAttack();
+				System.out.println("attackToThE enemy: " + doIt);
+				return doIt;
 			}
 		}
-		System.out.println("isdoch null und ich ein idiot: " );
+		System.out.println("isdoch null und ich ein idiot: ");
 		if (myMonster.getHealth() < 70) {
 			if (healingField != null) {
 				Action goToHeal = goToHealingField(healingField);
@@ -161,7 +164,7 @@ public class Gimli extends Player {
 			}
 		}
 		//800 is the energy, he needs to cross 2 waterFields
-		if (myMonster.getEnergy() >= 800) {
+		if (myMonster.getEnergy() >= 800 || model.getField(myMonster.getPosition()) instanceof WaterField) {
 			//go through all directions
 			for (Direction direction : Direction.values()) {
 				Action move = new MoveAction(direction);
@@ -236,7 +239,7 @@ public class Gimli extends Player {
 			return null;
 		}
 		Position nearest = null;
-		int distance = 10;
+		int distance = 50;
 		for (Position position : healingFields) {
 			if (position.getDistanceTo(model.getMonster(getActorId()).getPosition()) < distance) {
 				distance = position.getDistanceTo(model.getMonster(getActorId()).getPosition());
