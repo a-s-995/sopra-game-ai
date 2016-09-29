@@ -60,7 +60,6 @@ public class Pumuckl extends Player {
 	public Action act() {
 		//i need the id of the enemy
 		this.myMonster = getModel().getMonster(getActorId());
-		System.out.println("myMonster: " + myMonster);
 		List<Monster> monsters = model.getMonsters();
 		for (Monster monster : monsters) {
 			if (monster.getId() != getActorId()) {
@@ -331,8 +330,6 @@ public class Pumuckl extends Player {
 	private int minimalMoveCost() {
 		return 0;
 	}
-
-
 	// TODO: 29.09.16 do not rest on fire
 }
 
