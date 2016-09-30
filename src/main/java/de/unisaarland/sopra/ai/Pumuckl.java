@@ -72,8 +72,10 @@ public class Pumuckl extends Player {
 		//first look, if must go on healing field
 		healingFields = model.getActiveHealingFields();
 		Position healingField = closestHealingField();
-		if (closestHealingField() != null) {
-			if ((closestHealingField().equals(myMonster.getPosition())) && (myMonster.getHealth() < 80)) {
+		//until here, nothing to change
+
+		if (healingField != null) {
+			if ((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80)) {
 				return getEnemyAttack();
 			}
 		}
@@ -330,7 +332,7 @@ public class Pumuckl extends Player {
 	private int minimalMoveCost() {
 		return 0;
 	}
-	// TODO: 29.09.16 do not rest on fire
+	// TODO: 29.09.16 do not rest on lava
 }
 
 
