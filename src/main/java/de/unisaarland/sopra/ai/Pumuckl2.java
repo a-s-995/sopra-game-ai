@@ -1,19 +1,16 @@
 package de.unisaarland.sopra.ai;
 
-import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
-import de.unisaarland.sopra.actions.Attack;
-import de.unisaarland.sopra.actions.MoveAction;
-import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
-import de.unisaarland.sopra.model.fields.WaterField;
+import de.unisaarland.sopra.model.fields.BushField;
+import de.unisaarland.sopra.model.fields.Field;
+import de.unisaarland.sopra.view.Player;
 
-import java.util.Collection;
+//import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -21,113 +18,201 @@ import java.util.Set;
  * <p>
  * project Anti
  */
-public class Pumuckl2 extends Pumuckl {
 
-	private Monster myMonster;;
+class Pumuckl2 extends Player {
+
+	private Monster myMonster;
+	private Set<Position> bushFields = new HashSet<>();
 	private int distanceToEnemy;
 	//id of the enemy
 	private int enemyId;
+	private int myId;
+	private Position closeBush;
 
+	//private Collection<Position> healingFields;
+	private MyPhase currentPhase = MyPhase.MOVE_TO_ENEMY;
+
+	private enum MyPhase {
+		MOVE_TO_ENEMY, TO_BUSH, ATTACK, WAIT
+	}
 
 	/**
-	 * the constructor method
-	 * it initialises the array bushFields with all bushFields
+	 * initialises a list with all bushfields
 	 *
-	 * @param model the model we need
+	 * @return {@code true} if there are bushfields on the map, else false
 	 */
-	public Pumuckl2(Model model) {
+	private boolean bushes() {
+		Field[][] fields = model.getBoard().getFields();
+		for (int i = 0; i < model.getBoard().getWidth(); i++) {
+			for (int j = 0; j < model.getBoard().getHeight(); j++) {
+				if (fields[i][j] instanceof BushField) {
+					bushFields.add(fields[i][j].getPosition());
+				}
+			}
+		}
+		return !bushFields.isEmpty();
+	}
+
+	/**
+	 * just sets the phase
+	 *
+	 * @param phase the new phase
+	 */
+	private void setCurrentPhase(MyPhase phase) {
+		this.currentPhase = phase;
+	}
+
+	/**
+	 * creates a new AI instance that controlls the kobold Pumuckl
+	 * initialates the phase
+	 *
+	 * @param model i need this model
+	 */
+	Pumuckl2(Model model) {
 		super(model);
+		System.out.println("PUMUCKL2 wird erstellt");
+		this.currentPhase = MyPhase.MOVE_TO_ENEMY;
 	}
 
 	@Override
 	public Action act() {
-		//i need the id of the enemy
 		this.myMonster = getModel().getMonster(getActorId());
+		this.myId = myMonster.getId();
 		List<Monster> monsters = model.getMonsters();
 		for (Monster monster : monsters) {
 			if (monster.getId() != getActorId()) {
-
 				enemyId = monster.getId();
 				break;
 			}
 		}
-		//the current distance to the enemy
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
-
-
-		Action doIt = getEnemyAttack();
-		if (doIt != null) {
-			return doIt;
-		}
-
-
-		//move to the enemy
-		return getBestMove(model.getMonster(enemyId).getPosition());
-
+		System.out.println("currentPhase:" + currentPhase);
+		// TODO: 01.10.16  heilen heile segen
+		return handlePhase();
 	}
 
-	private Action getEnemyAttack() {
-		for (Direction direction : Direction.values()) {
-			Attack attack = new StabAttack(direction);
-			if (attack.validate(model, myMonster)) {
-				if (model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition()
-						.equals(model.getMonster(enemyId).getPosition())) {
-					return attack;
-				}
-			}
+	/**
+	 * diese methode wird von act aufgerufen, und soll der Phase entsprechend eine action zurückgeben
+	 *
+	 * @return an action
+	 */
+	private Action handlePhase() {
+		switch (currentPhase) {
+			case MOVE_TO_ENEMY:
+				return moveToEnemyPhase();
+			case TO_BUSH:
+				return bushPhase();
+			case WAIT:
+				return waitPhase();
+			case ATTACK:
+				return attackPhase();
+			default:
+				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
+				return null;
+
 		}
-		return null;
 	}
-	private Action getBestMove(Position whereIWantToGo) {
 
-		//the distance to whereIWantToGo, if myMonster moves to it, this has to decrease
-		int oldDistance = whereIWantToGo.getDistanceTo(myMonster.getPosition());
+	/**
+	 * controlls the moveToEnemy Phase an returns the best Action
+	 * this is the initial Phase, myMonster just wants to reach the enemy in this phase
+	 * todo maybe make it a better phase,
+	 *
+	 * @return the best move
+	 */
+	private Action moveToEnemyPhase() {
+		//changes the phase when at enemy
+		if (myMonster.getEnergy() < 250
+				&& model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1) {
+			//are there bushes?
+			//bushFields.isEmpty()
+			if (!bushes()) {
+				System.out.println("there are no bushes");
+				setCurrentPhase(MyPhase.ATTACK);
+				return null;
+			}
+			//make it attackphase, if no bushfield close to me
+			closeBush = closestBushToMe();
+			if (closeBush == null) {
+				System.out.println("there is no near bush");
+				setCurrentPhase(MyPhase.ATTACK);
+				return null;
+			}
+			//bush phase
+			System.out.println("GO TO BUSHPHASE");
+			setCurrentPhase(MyPhase.TO_BUSH);
+			return null;
+		}
+		//the normal case in this phase, move to enemy and maybe attack
+		PlanMoveEnemy move = new PlanMoveEnemy(model, myId, enemyId);
+		return move.getMoveAction();
+	}
 
-		//go through all directions
-		for (Direction direction : Direction.values()) {
-			Action move = new MoveAction(direction);
-
-			//first, is a move in this direction valid?
-			if (move.validate(model, myMonster)) {
-
-				//if its valid, then get the neighbourFields position in the direction
-				Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
-
-				//and from this position, get the distance to where i want to go, and look if it is lower than before
-				if (position.getDistanceTo(whereIWantToGo) < oldDistance) {
-
-					//if its lower, return this move from which myMonster is closer to the enemy
-					return move;
-				}
+	/**
+	 * this method controlls the bushPhase
+	 * in the bushphase, the kobold stabs 2 times in the beginning, then moves to the bush
+	 *
+	 * @return the best Action
+	 */
+	private Action bushPhase() {
+		//am i already on the bush? then WaitPhase
+		if (myMonster.getPosition().equals(closeBush)) {
+			if (distanceToEnemy == 1) {
+				//when the enemy is beside me, attack and make attackphase
+				setCurrentPhase(MyPhase.ATTACK);
+				PlanningAttack attacke = new PlanningAttack(model, myId, enemyId, bushFields);
+				return attacke.getActionAttack();
+			} else {
+				setCurrentPhase(MyPhase.WAIT);
+				//IST DIES HIER RICHTIG??? null GUT?  in der nächsten phase verlasse ich mich darauf
+				return null;
 			}
 		}
-		//800 is the energy, he needs to cross 2 waterFields
-		if (myMonster.getEnergy() >= 800 || model.getField(myMonster.getPosition()) instanceof WaterField) {
-			//go through all directions
-			for (Direction direction : Direction.values()) {
-				Action move = new MoveAction(direction);
-				//look, if move keeps the same distance to enemy
-				if (move.validate(model, myMonster)) {
-					//if its valid, then get the neighbourFields position in the direction
-					Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
-					if (position.getDistanceTo(whereIWantToGo) == oldDistance) {
-						return move;
-					}
-				}
+		//the normal case
+		PlanMoveBush move = new PlanMoveBush(model, myId, enemyId, closeBush);
+		return move.getMoveAct();
+	}
+
+	/**
+	 * this method waits one round for the enemy on a bushfield and sets on attacking phase
+	 * if the kobold may attack the enemy, he does
+	 *
+	 * @return an action
+	 */
+	private Action waitPhase() {
+		PlanWaitPhase wait = new PlanWaitPhase(model, myId, enemyId);
+		setCurrentPhase(MyPhase.ATTACK);
+		return wait.getActionAttacke();
+	}
+
+	/**
+	 * this method is called in the last phase, the action phase
+	 * myMonster should run to the enemy and attack, and if a bushfield is around him, he should go on the bushfield
+	 * at the end of one round
+	 *
+	 * @return an action
+	 */
+	private Action attackPhase() {
+		PlanningAttack attacke = new PlanningAttack(model, myId, enemyId, bushFields);
+		return attacke.getActionAttack();
+	}
+
+	/**
+	 * this method is just important in the moveToBushPhase
+	 *
+	 * @return the position of the closest bush (to me)
+	 */
+	private Position closestBushToMe() {
+		Position nearest = null;
+		//the initial distance, the bushField has to have at least the same distance
+		int distance = 8;
+		for (Position position : bushFields) {
+			if (position.getDistanceTo(myMonster.getPosition()) < distance) {
+				distance = position.getDistanceTo(myMonster.getPosition());
+				nearest = position;
 			}
 		}
-		Random random = new Random();
-		//just go in this if Statement, if the method is called to move to the enemy
-		if (oldDistance == distanceToEnemy) {
-			if (myMonster.getEnergy() == 1000) {
-				Action[] possibleMoves = myMonster.planMoves(model).toArray(new Action[0]);
-				if (possibleMoves.length == 0) {
-					return null;
-				}
-				return possibleMoves[random.nextInt(possibleMoves.length)];
-			}
-		}
-		return null;
+		return nearest;
 	}
 
 }
