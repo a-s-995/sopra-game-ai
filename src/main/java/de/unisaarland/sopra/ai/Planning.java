@@ -55,9 +55,13 @@ abstract class Planning {
 	 * @return true
 	 */
 	private boolean mayReallyGoThere(Direction direction) {
-		return !(model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof CursedField
-				|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof WaterField
-				|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof LavaField);
+		try {
+			return !(model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof CursedField
+					|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof WaterField
+					|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof LavaField);
+		} catch (PositionOutOfBoardException e) {
+			return true;
+		}
 	}
 
 	/**
