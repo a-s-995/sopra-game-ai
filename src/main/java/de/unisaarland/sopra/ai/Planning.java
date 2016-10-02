@@ -264,5 +264,31 @@ abstract class Planning {
 		}
 		return null;
 	}
+
+
+	protected Boolean canMoveToBush(Position whereIWantToGo) {
+		//the distance to whereIWantToGo, if myMonster moves to it, this has to decrease
+		int oldDistance = whereIWantToGo.getDistanceTo(myMonster.getPosition());
+
+		//go through all directions
+		for (Direction direction : Direction.values()) {
+			Action move = new MoveAction(direction);
+
+			//first, is a move in this direction valid?
+			if (move.validate(model, myMonster)) {
+
+				//if its valid, then get the neighbourFields position in the direction
+				Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
+
+				//and from this position, get the distance to where i want to go, and look if it is lower than before
+				if (position.getDistanceTo(whereIWantToGo) <= oldDistance) {
+					//if its lower, return this move from which myMonster is closer to the enemy
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 }
 

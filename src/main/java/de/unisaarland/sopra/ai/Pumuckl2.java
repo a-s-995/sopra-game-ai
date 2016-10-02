@@ -8,7 +8,7 @@ import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
 import de.unisaarland.sopra.view.Player;
 
-//import java.util.Collection;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +29,7 @@ class Pumuckl2 extends Player {
 	private int myId;
 	private Position closeBush;
 
-	//private Collection<Position> healingFields;
+	private Collection<Position> healingFields;
 	private MyPhase currentPhase = MyPhase.MOVE_TO_ENEMY;
 
 	private enum MyPhase {
@@ -87,7 +87,21 @@ class Pumuckl2 extends Player {
 		}
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		System.out.println("currentPhase:" + currentPhase);
-		// TODO: 01.10.16  heilen heile segen
+		//handleHEAL
+		healingFields = model.getActiveHealingFields();
+		if(!healingFields.isEmpty()) {
+			Position healingField = closestHealingField();
+			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
+				return handlePhase();
+			}
+			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
+					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
+					&& (model.getEnergy(enemyId) > myMonster.getEnergy()))
+					|| model.getField(model.getMonster(enemyId).getPosition()) instanceof BushField) {
+				PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
+				return healMove.getMoveAct();
+			}
+		}
 		return handlePhase();
 	}
 
@@ -209,6 +223,19 @@ class Pumuckl2 extends Player {
 		for (Position position : bushFields) {
 			if (position.getDistanceTo(myMonster.getPosition()) < distance) {
 				distance = position.getDistanceTo(myMonster.getPosition());
+				nearest = position;
+			}
+		}
+		return nearest;
+	}
+
+	//// TODO: 27.09.16 change in healing field, that has  the minimum of costs to reach, ANSEHEN!!
+	private Position closestHealingField() {
+		Position nearest = null;
+		int distance = 50;
+		for (Position position : healingFields) {
+			if (position.getDistanceTo(model.getMonster(getActorId()).getPosition()) < distance) {
+				distance = position.getDistanceTo(model.getMonster(getActorId()).getPosition());
 				nearest = position;
 			}
 		}
