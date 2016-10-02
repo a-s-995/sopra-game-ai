@@ -142,7 +142,6 @@ abstract class Planning {
 		}
 		Random random = new Random();
 		//just go in this if Statement, if the method is called to move to the enemy
-		//totaler scheiss, schränkt nur auf einen umkreis ein
 		if (myMonster.getEnergy() == 1000) {
 			Action[] possibleMoves = myMonster.planMoves(model).toArray(new Action[0]);
 			if (possibleMoves.length == 0) {

@@ -2,6 +2,8 @@ package de.unisaarland.sopra.ai;
 
 import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
+import de.unisaarland.sopra.actions.SlashAttack;
+import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
 
@@ -32,6 +34,13 @@ public class PlanHeal extends Planning {
 	}
 	@Override
 	protected Action whichAttack(Direction direction) {
-		return null;
+		if (model.getMonster(enemyId).getHealth() <= 54 && model.getMonster(enemyId).getHealth() >= 42
+				&& (myMonster.getEnergy() == 1000 || myMonster.getEnergy() == 580)) {
+			return new SlashAttack(direction);
+		}
+		if (myMonster.getEnergy() == 900 || myMonster.getEnergy() == 480 || myMonster.getEnergy() == 700) {
+			return new SlashAttack(direction);
+		}
+		return new StabAttack(direction);
 	}
 }

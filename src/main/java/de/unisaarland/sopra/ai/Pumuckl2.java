@@ -77,9 +77,6 @@ class Pumuckl2 extends Player {
 	@Override
 	public Action act() {
 		this.myMonster = getModel().getMonster(getActorId());
-		if(myMonster.getEnergy() < 100) {
-			return null;
-		}
 		this.myId = myMonster.getId();
 		List<Monster> monsters = model.getMonsters();
 		for (Monster monster : monsters) {
@@ -90,21 +87,7 @@ class Pumuckl2 extends Player {
 		}
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		System.out.println("currentPhase:" + currentPhase);
-		//handleHEAL
-		healingFields = model.getActiveHealingFields();
-		if(!healingFields.isEmpty()) {
-			Position healingField = closestHealingField();
-			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
-				return handlePhase();
-			}
-			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
-					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
-					&& (model.getEnergy(enemyId) > myMonster.getEnergy()))
-					|| model.getField(model.getMonster(enemyId).getPosition()) instanceof BushField) {
-				PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
-				return healMove.getMoveAct();
-			}
-		}
+
 		return handlePhase();
 	}
 
@@ -122,12 +105,30 @@ class Pumuckl2 extends Player {
 			case WAIT:
 				return waitPhase();
 			case ATTACK:
-				return attackPhase();
+				return healPhase();
 			default:
 				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
 				return null;
 
 		}
+	}
+
+	private Action healPhase() {
+		//handleHEAL
+		healingFields = model.getActiveHealingFields();
+		if (!healingFields.isEmpty()) {
+			Position healingField = closestHealingField();
+			PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
+			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
+				return healMove.getAttack();
+			}
+			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
+					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
+					&& (model.getEnergy(enemyId) > myMonster.getEnergy()))) {
+				return healMove.getMoveAct();
+			}
+		}
+		return attackPhase();
 	}
 
 	/**
@@ -139,8 +140,11 @@ class Pumuckl2 extends Player {
 	 */
 	private Action moveToEnemyPhase() {
 		//changes the phase when at enemy
-		if (myMonster.getEnergy() < 250
-				&& model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1) {
+		PlanMoveEnemy move = new PlanMoveEnemy(model, myId, enemyId);
+		if ((model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1)) {
+			if(myMonster.getEnergy() >= 250) {
+				return move.getAttack();
+			}
 			//are there bushes?
 			//bushFields.isEmpty()
 			if (!bushes()) {
@@ -161,7 +165,6 @@ class Pumuckl2 extends Player {
 			return null;
 		}
 		//the normal case in this phase, move to enemy and maybe attack
-		PlanMoveEnemy move = new PlanMoveEnemy(model, myId, enemyId);
 		return move.getMoveAction();
 	}
 

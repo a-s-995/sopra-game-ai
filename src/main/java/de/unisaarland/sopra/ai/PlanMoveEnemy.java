@@ -26,11 +26,6 @@ class PlanMoveEnemy extends Planning {
 	}
 
 	private void initializeMove() {
-		if (model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1) {
-			//maybe null, but is ok
-			this.moveAction = getAttack();
-			return;
-		}
 		this.moveAction = getBestMove(model.getMonster(enemyId).getPosition());
 	}
 
