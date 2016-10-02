@@ -77,6 +77,9 @@ class Pumuckl2 extends Player {
 	@Override
 	public Action act() {
 		this.myMonster = getModel().getMonster(getActorId());
+		if(myMonster.getEnergy() < 100) {
+			return null;
+		}
 		this.myId = myMonster.getId();
 		List<Monster> monsters = model.getMonsters();
 		for (Monster monster : monsters) {
