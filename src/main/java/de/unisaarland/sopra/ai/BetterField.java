@@ -6,4 +6,6 @@ package de.unisaarland.sopra.ai;
  * project Anti
  */
 public class BetterField {
+
+
 }

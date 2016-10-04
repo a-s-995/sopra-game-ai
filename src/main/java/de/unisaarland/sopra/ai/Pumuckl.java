@@ -10,10 +10,9 @@ import de.unisaarland.sopra.model.fields.Field;
 import de.unisaarland.sopra.model.fields.WaterField;
 import de.unisaarland.sopra.view.Player;
 
-import java.util.Collection;
+
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -30,7 +29,7 @@ public class Pumuckl extends Player {
 	private int distanceToEnemy;
 	//id of the enemy
 	private int enemyId;
-	private Collection<Position> healingFields;
+//	private Collection<Position> healingFields;
 
 	/**
 	 * initialate the bushes set with all bushes of the map
@@ -70,7 +69,7 @@ public class Pumuckl extends Player {
 		//the current distance to the enemy
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		//first look, if must go on healing field
-		healingFields = model.getActiveHealingFields();
+		/*healingFields = model.getActiveHealingFields();
 		Position healingField = closestHealingField();
 		//until here, nothing to change
 
@@ -86,7 +85,7 @@ public class Pumuckl extends Player {
 					return goToHeal;
 				}
 			}
-		}
+		}*/
 		//second, may i attack?
 		Action doIt = getEnemyAttack();
 		if (doIt != null) {
@@ -162,8 +161,13 @@ public class Pumuckl extends Player {
 				}
 			}
 		}
+
+		return null;
+	}
+
+
 		//800 is the energy, he needs to cross 2 waterFields
-		if (myMonster.getEnergy() >= 800 || model.getField(myMonster.getPosition()) instanceof WaterField) {
+		/*if (myMonster.getEnergy() >= 800 || model.getField(myMonster.getPosition()) instanceof WaterField) {
 			//go through all directions
 			for (Direction direction : Direction.values()) {
 				Action move = new MoveAction(direction);
@@ -196,7 +200,7 @@ public class Pumuckl extends Player {
 	 *
 	 * @return moveAction to nearest healing field
 	 */
-	private Action goToHealingField(Position nearestHealingField) {
+	/*private Action goToHealingField(Position nearestHealingField) {
 		int myMonstersHealth = myMonster.getHealth();
 		int enemiesHealth = model.getHealth(enemyId);
 		int myMonstersEnergy = myMonster.getEnergy();
@@ -233,7 +237,7 @@ public class Pumuckl extends Player {
 	}
 
 	//// TODO: 27.09.16 change in healing field, that has  the minimum of costs to reach, ANSEHEN!!
-	private Position closestHealingField() {
+	/*private Position closestHealingField() {
 		if (healingFields.toArray().length == 0) {
 			return null;
 		}
