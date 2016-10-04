@@ -9,18 +9,19 @@ import de.unisaarland.sopra.model.Position;
  * project Anti
  */
 public class Path {
+	//die position des feldes, wohin dieser pfad führt
 	Position current;
+	//die kosten zu dieser position
 	int cost;
+	//der vorausgehende pfad, zum feld davor
 	Path thePath;
-	Action lastAction;
-	Boolean alreadyVisit;
 
-	public Path(Position current, int cost, Path thePath, Action lastAction) {
-		this.current = current;
-		this.cost = cost;
-		this.thePath = thePath;
-		this.lastAction = lastAction;
-		this.alreadyVisit = false;
+	Action lastAction;
+	//true, if its already visited, initial false
+	Boolean alreadyVisit = false;
+
+	public Path() {
+
 	}
 
 	public Position getCurrent() {
