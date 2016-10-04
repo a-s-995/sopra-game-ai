@@ -26,6 +26,7 @@ abstract class Planning {
 	int enemyId;
 	Monster myMonster;
 
+
 	Planning(Model model, int myID, int enemyId) {
 		this.model = model;
 		this.enemyId = enemyId;
@@ -55,13 +56,9 @@ abstract class Planning {
 	 * @return true
 	 */
 	private boolean mayReallyGoThere(Direction direction) {
-		try {
-			return !(model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof CursedField
-					|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof WaterField
-					|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof LavaField);
-		} catch (PositionOutOfBoardException e) {
-			return true;
-		}
+		return !(model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof CursedField
+				|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof WaterField
+				|| model.getBoard().getNeighbour(myMonster.getPosition(), direction) instanceof LavaField);
 	}
 
 	/**
@@ -77,13 +74,12 @@ abstract class Planning {
 				|| model.getField(position) instanceof LavaField) {
 			for (Direction direction : Direction.values()) {
 				//is around this position the enemy?
-				try{
+				try {
 					if (model.getBoard().getNeighbour(position, direction).getPosition()
 							.equals(model.getMonster(enemyId).getPosition())) {
 						return false;
 					}
-				}
-				catch (PositionOutOfBoardException e) {
+				} catch (PositionOutOfBoardException e) {
 					continue;
 				}
 			}
@@ -91,12 +87,6 @@ abstract class Planning {
 		return true;
 	}
 
-	/**
-	 * bla
-	 *
-	 * @param whereIWantToGo bla
-	 * @return bla
-	 */
 	Action getBestMove(Position whereIWantToGo) {
 		//the distance to whereIWantToGo, if myMonster moves to it, this has to decrease
 		int oldDistance = whereIWantToGo.getDistanceTo(myMonster.getPosition());
@@ -126,7 +116,7 @@ abstract class Planning {
 			}
 		}
 		//800 is the energy, he needs to cross 2 waterFields
-		if (myMonster.getEnergy() >= 800 || model.getField(myMonster.getPosition()) instanceof WaterField) {
+		if (myMonster.getEnergy() >= 500 || model.getField(myMonster.getPosition()) instanceof WaterField) {
 			//go through all directions
 			for (Direction direction : Direction.values()) {
 				Action move = new MoveAction(direction);
@@ -192,75 +182,35 @@ abstract class Planning {
 				|| model.getField(myMonster.getPosition()) instanceof WaterField) {
 			switch (direction) {
 				case WEST:
-					if (mayReallyGoThere(Direction.NORTH_EAST)) {
-						if (new MoveAction(Direction.NORTH_EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.NORTH_EAST);
-						}
-					}
-					if (mayReallyGoThere(Direction.SOUTH_EAST)) {
-						if (new MoveAction(Direction.SOUTH_EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.SOUTH_EAST);
-						}
-					}
+					if (mayAdj(Direction.NORTH_EAST)) {
+						return moveAdj(Direction.NORTH_EAST);
+					} else
+						return moveAdj(Direction.SOUTH_EAST);
 				case SOUTH_WEST:
-					if (mayReallyGoThere(Direction.NORTH_WEST)) {
-						if (new MoveAction(Direction.NORTH_WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.NORTH_WEST);
-						}
-					}
-					if (mayReallyGoThere(Direction.EAST)) {
-						if (new MoveAction(Direction.EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.EAST);
-						}
-					}
-
+					if (mayAdj(Direction.NORTH_WEST)) {
+						return moveAdj(Direction.NORTH_WEST);
+					} else
+						return moveAdj(Direction.EAST);
 				case SOUTH_EAST:
-					if (mayReallyGoThere(Direction.WEST)) {
-						if (new MoveAction(Direction.WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.WEST);
-						}
-					}
-					if (mayReallyGoThere(Direction.NORTH_EAST)) {
-						if (new MoveAction(Direction.NORTH_EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.NORTH_EAST);
-						}
-					}
-
+					if (mayAdj(Direction.WEST)) {
+						return moveAdj(Direction.WEST);
+					} else
+						return moveAdj(Direction.NORTH_EAST);
 				case EAST:
-					if (mayReallyGoThere(Direction.SOUTH_WEST)) {
-						if (new MoveAction(Direction.SOUTH_WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.SOUTH_WEST);
-						}
-					}
-					if (mayReallyGoThere(Direction.NORTH_WEST)) {
-						if (new MoveAction(Direction.NORTH_WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.NORTH_WEST);
-						}
-					}
-
+					if (mayAdj(Direction.SOUTH_WEST)) {
+						return moveAdj(Direction.SOUTH_WEST);
+					} else
+						return moveAdj(Direction.NORTH_WEST);
 				case NORTH_EAST:
-					if (mayReallyGoThere(Direction.SOUTH_EAST)) {
-						if (new MoveAction(Direction.SOUTH_EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.SOUTH_EAST);
-						}
-					}
-					if (mayReallyGoThere(Direction.WEST)) {
-						if (new MoveAction(Direction.WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.WEST);
-						}
-					}
-
+					if (mayAdj(Direction.SOUTH_EAST)) {
+						return moveAdj(Direction.SOUTH_EAST);
+					} else
+						return moveAdj(Direction.WEST);
 				case NORTH_WEST:
-					if (mayReallyGoThere(Direction.EAST)) {
-						if (new MoveAction(Direction.EAST).validate(model, myMonster)) {
-							return new MoveAction(Direction.EAST);
-						}
-					}
-					if (mayReallyGoThere(Direction.SOUTH_WEST)) {
-						if (new MoveAction(Direction.SOUTH_WEST).validate(model, myMonster)) {
-							return new MoveAction(Direction.SOUTH_WEST);
-						}
-					}
+					if (mayAdj(Direction.EAST)) {
+						return moveAdj(Direction.EAST);
+					} else
+						return moveAdj(Direction.SOUTH_WEST);
 				default:
 					return null;
 			}
@@ -268,29 +218,24 @@ abstract class Planning {
 		return null;
 	}
 
-
-	protected Boolean canMoveToBush(Position whereIWantToGo) {
-		//the distance to whereIWantToGo, if myMonster moves to it, this has to decrease
-		int oldDistance = whereIWantToGo.getDistanceTo(myMonster.getPosition());
-
-		//go through all directions
-		for (Direction direction : Direction.values()) {
-			Action move = new MoveAction(direction);
-
-			//first, is a move in this direction valid?
-			if (move.validate(model, myMonster)) {
-
-				//if its valid, then get the neighbourFields position in the direction
-				Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
-
-				//and from this position, get the distance to where i want to go, and look if it is lower than before
-				if (position.getDistanceTo(whereIWantToGo) <= oldDistance) {
-					//if its lower, return this move from which myMonster is closer to the enemy
-					return true;
-				}
+	private Boolean mayAdj(Direction direction) {
+		Action move = new MoveAction(direction);
+		if (move.validate(model, myMonster)) {
+			if (mayReallyGoThere(direction)) {
+				return true;
 			}
 		}
 		return false;
+	}
+
+	private Action moveAdj(Direction direction) {
+		Action move = new MoveAction(direction);
+		if (move.validate(model, myMonster)) {
+			if (mayReallyGoThere(direction)) {
+				return move;
+			}
+		}
+		return null;
 	}
 
 }
