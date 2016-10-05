@@ -8,53 +8,56 @@ import de.unisaarland.sopra.model.Position;
  * <p>
  * project Anti
  */
-public class Path {
+class Path {
 	//die position des feldes, wohin dieser pfad führt
-	Position current;
+	private Position current;
 	//die kosten zu dieser position
-	int cost;
+	private int cost;
 	//der vorausgehende pfad, zum feld davor
-	Path thePath;
+	private Path thePath;
+	//from this Action, i get from where i come from
+	private Action lastAction;
 
-	Action lastAction;
-	//true, if its already visited, initial false
-	Boolean alreadyVisit = false;
 
-	public Path() {
-
-	}
-
-	public Position getCurrent() {
-		return current;
-	}
-
-	public int getCost() {
-		return cost;
-	}
-
-	public Path getThePath() {
-		return thePath;
-	}
-
-	public Action getLastAction() {
-		return lastAction;
-	}
-
-	public void setCurrent(Position current) {
+	Path(Position current, int cost) {
 		this.current = current;
-	}
-
-	public void setCost(int cost) {
 		this.cost = cost;
 	}
 
-	public void setThePath(Path thePath) {
+	Path(Position current, int cost, Path thePath, Action lastAction) {
+		this.current = current;
+		this.cost = cost;
 		this.thePath = thePath;
-	}
-
-	public void setLastAction(Action lastAction) {
 		this.lastAction = lastAction;
 	}
+
+	Position getCurrent() {
+		return current;
+	}
+
+	int getCost() {
+		return cost;
+	}
+
+	Path getThePath() {
+		return thePath;
+	}
+
+	Action getLastAction() {
+		return lastAction;
+	}
+
+	void setCost(int cost) {
+		this.cost = cost;
+	}
+
+//	public void setThePath(Path thePath) {
+//		this.thePath = thePath;
+//	}
+
+//	public void setLastAction(Action lastAction) {
+//		this.lastAction = lastAction;
+//	}
 	//new simulate controller a
 	//a.step(command)
 	//b = a.getmodel
