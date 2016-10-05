@@ -26,11 +26,12 @@ public class Dijkstra {
 	private Model model;
 	private Model copyModel;
 	private int myId;
+	private int enemyId;
 	private Position start;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
-	protected Dijkstra(Model model, int myId) {
+	protected Dijkstra(Model model, int myId, int enemyId) {
 		this.model = model;
 		this.myId = myId;
 		this.start = model.getMonster(myId).getPosition();
@@ -51,6 +52,8 @@ public class Dijkstra {
 			int next = minDist();
 			//ein reihen durchlauf
 			//get the current position
+			// TODO: 05.10.16  break if the current position has distance to enemy of 1, aber nicht direkt, sonst
+			//sonst berechne ich nur einen abstand vom gegner, nicht den besten
 			for (Position position : positions) {
 				if (position.getDistanceTo(model.getMonster(myId).getPosition()) == next) {
 					//get the path to this position
@@ -58,7 +61,11 @@ public class Dijkstra {
 					positions.remove(position);
 					//move arraound
 					// TODO: 04.10.16 vllt in extra methode, wenn PMD zickt
-					for (Direction dir : Direction.values()) {
+					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
+					if (direcionSet == null) {
+						continue;
+					}
+					for (Direction dir : direcionSet) {
 						//create the current model
 						Path temp = currentPath;
 						// a queue
@@ -72,9 +79,8 @@ public class Dijkstra {
 						copyModel = model.copy();
 						//let the monster move to the current position
 						while (!moves.isEmpty()) {
-							//take the first object of the queue
-							Command command = new ActionCommand(moves.getFirst(), myId);
-							moves.removeFirst();
+							//take the first object of the queue and removes it
+							Command command = new ActionCommand(moves.poll(), myId);
 							SimulateController controller = new SimulateController(copyModel);
 							controller.step(command);
 							copyModel = controller.getModel();
@@ -96,7 +102,31 @@ public class Dijkstra {
 		}
 	}
 
-	protected Map<Position, Path> getHash() {
+	protected Deque<Action> toActionQueue() {
+		allgo();
+		int min = 11;
+		Path nearestPath = null;
+		for (Path value : hash.values()) {
+			if (value.getCost() > 1000) {
+				continue;
+			}
+			//get the nearest path to enemy, not the cheapest
+			if (value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition()) < min) {
+				min = value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition());
+				nearestPath = value;
+			}
+		}
+		Deque<Action> moves = new LinkedList<>();
+		assert nearestPath != null;
+		while (nearestPath.getLastAction() != null) {
+			// add the last action as first one in the queue
+			moves.addFirst(nearestPath.getLastAction());
+			nearestPath = nearestPath.getThePath();
+		}
+		return moves;
+	}
+
+	protected Map<Position, Path> getHashResult() {
 		allgo();
 		return hash;
 	}
@@ -122,8 +152,9 @@ public class Dijkstra {
 				controller.step(command);
 				copyModel = controller.getModel();
 				//the path for the positions around start
+
 				Path toPath = new Path(copyModel.getMonster(myId).getPosition(),
-						1000 - copyModel.getMonster(myId).getEnergy(), null, move);
+						1000 - copyModel.getMonster(myId).getEnergy(), hash.get(start), move);
 				//replace it in the hashmap
 				hash.replace(copyModel.getMonster(myId).getPosition(), toPath);
 				//do not remove this position
@@ -157,5 +188,58 @@ public class Dijkstra {
 			}
 		}
 		return init;
+	}
+
+	private Set<Direction> getFiveDirections(Action lastMove) {
+		ActionVisitorAi visitor = new ActionVisitorAi();
+		Direction direction = lastMove.accept(visitor);
+		Set<Direction> direcs = new HashSet<>();
+		switch (direction) {
+			case EAST:
+				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_WEST);
+				direcs.add(Direction.SOUTH_EAST);
+				break;
+			case NORTH_EAST:
+				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_WEST);
+				direcs.add(Direction.SOUTH_EAST);
+				break;
+			case NORTH_WEST:
+				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_WEST);
+				direcs.add(Direction.SOUTH_EAST);
+				break;
+			case WEST:
+				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.SOUTH_WEST);
+				direcs.add(Direction.SOUTH_EAST);
+				break;
+			case SOUTH_WEST:
+				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_EAST);
+				break;
+			case SOUTH_EAST:
+				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_WEST);
+				break;
+			default:
+				return null;
+		}
+		return direcs;
 	}
 }

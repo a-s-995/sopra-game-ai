@@ -8,7 +8,6 @@ import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
 import de.unisaarland.sopra.view.Player;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +28,7 @@ class Pumuckl2 extends Player {
 	private int myId;
 	private Position closeBush;
 
-	private Collection<Position> healingFields;
+//	private Collection<Position> healingFields;
 	private MyPhase currentPhase = MyPhase.MOVE_TO_ENEMY;
 
 	private enum MyPhase {
@@ -76,6 +75,10 @@ class Pumuckl2 extends Player {
 
 	@Override
 	public Action act() {
+		//wait the first round
+		if(model.getRoundCount() == 1) {
+			return null;
+		}
 		this.myMonster = getModel().getMonster(getActorId());
 		this.myId = myMonster.getId();
 		List<Monster> monsters = model.getMonsters();
@@ -86,8 +89,8 @@ class Pumuckl2 extends Player {
 			}
 		}
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
-		System.out.println("currentPhase:" + currentPhase);
 
+		System.out.println("currentPhase:" + currentPhase);
 		return handlePhase();
 	}
 
@@ -105,30 +108,12 @@ class Pumuckl2 extends Player {
 			case WAIT:
 				return waitPhase();
 			case ATTACK:
-				return healPhase();
+				return attackPhase();
 			default:
 				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
 				return null;
 
 		}
-	}
-
-	private Action healPhase() {
-		//handleHEAL
-		healingFields = model.getActiveHealingFields();
-		if (!healingFields.isEmpty()) {
-			Position healingField = closestHealingField();
-			PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
-			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
-				return healMove.getAttack();
-			}
-			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
-					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
-					&& (model.getEnergy(enemyId) == 1000))) {
-				return healMove.getMoveAct();
-			}
-		}
-		return attackPhase();
 	}
 
 	/**
@@ -235,8 +220,102 @@ class Pumuckl2 extends Player {
 		return nearest;
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		/*private Action healPhase() {
+		//handleHEAL
+		healingFields = model.getActiveHealingFields();
+		if (!healingFields.isEmpty()) {
+			Position healingField = closestHealingField();
+			PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
+			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
+				return healMove.getAttack();
+			}
+			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
+					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
+					&& (model.getEnergy(enemyId) == 1000))) {
+				return healMove.getMoveAct();
+			}
+		}
+		return attackPhase();
+	}*/
 	//// TODO: 27.09.16 change in healing field, that has  the minimum of costs to reach, ANSEHEN!!
-	private Position closestHealingField() {
+	/*private Position closestHealingField() {
 		Position nearest = null;
 		int distance = 100;
 		for (Position position : healingFields) {
@@ -246,6 +325,6 @@ class Pumuckl2 extends Player {
 			}
 		}
 		return nearest;
-	}
+	}*/
 
 }
