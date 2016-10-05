@@ -17,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 
@@ -31,6 +30,8 @@ class Dijkstra {
 	private Model copyModel;
 	private int myId;
 	private int enemyId;
+	private Position start;
+	private Position destination;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
@@ -118,7 +119,8 @@ class Dijkstra {
 
 	Deque<Action> toActionQueue() {
 		allgo();
-		int min = 11;
+		int min = 100;
+		System.out.println("1");
 		List<Path> movebeside = new LinkedList<>();
 		Path nearestPath = null;
 		for (Path value : hash.values()) {
@@ -134,6 +136,8 @@ class Dijkstra {
 				nearestPath = value;
 			}
 		}
+		System.out.println("nearestPath" + nearestPath);
+		System.out.println("movebeside" + movebeside);
 		int minCost = 10000;
 		if(!movebeside.isEmpty()) {
 			for (Path pfd : movebeside) {
@@ -143,9 +147,11 @@ class Dijkstra {
 				}
 			}
 		}
+		System.out.println("nearestPath near enemy" + nearestPath);
 		Deque<Action> moves = new LinkedList<>();
 		assert nearestPath != null;
 		boolean bool = true;
+		System.out.println("4");
 		while (nearestPath.getLastAction() != null) {
 			// add the last action as first one in the queue
 			if(bool){
@@ -159,6 +165,7 @@ class Dijkstra {
 			nearestPath = nearestPath.getThePath();
 		}
 
+		System.out.println("moves" + moves);
 		return moves;
 	}
 
