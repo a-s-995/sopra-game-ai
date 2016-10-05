@@ -88,7 +88,7 @@ public class ActionVisitorAi extends ActionVisitor<Direction> {
 
 	@Override
 	public Direction visitMoveAction(MoveAction moveAction, Direction direction) {
-		return null;
+		return direction;
 	}
 
 	@Override

@@ -22,7 +22,7 @@ public final class Main {
 
 			@Override
 			public Player create(Model model) {
-				return new Pumuckl2(model);
+				return new Pumuckl4(model);
 			}
 		});
 		de.unisaarland.sopra.Main.main(args);

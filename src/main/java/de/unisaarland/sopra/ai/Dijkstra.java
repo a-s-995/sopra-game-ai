@@ -8,12 +8,16 @@ import de.unisaarland.sopra.commands.Command;
 import de.unisaarland.sopra.controller.SimulateController;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
+import de.unisaarland.sopra.model.fields.LavaField;
 
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 
@@ -22,19 +26,18 @@ import java.util.Set;
  * <p>
  * project Anti
  */
-public class Dijkstra {
+class Dijkstra {
 	private Model model;
 	private Model copyModel;
 	private int myId;
 	private int enemyId;
-	private Position start;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
-	protected Dijkstra(Model model, int myId, int enemyId) {
+	Dijkstra(Model model, int myId, int enemyId) {
 		this.model = model;
 		this.myId = myId;
-		this.start = model.getMonster(myId).getPosition();
+		this.enemyId = enemyId;
 		//initialize positions
 		for (int i = 0; i < this.model.getBoard().getWidth(); i++) {
 			for (int j = 0; j < this.model.getBoard().getHeight(); j++) {
@@ -50,22 +53,33 @@ public class Dijkstra {
 		//go trough all positions
 		while (!positions.isEmpty()) {
 			int next = minDist();
+			if(next == 11) {
+				break;
+			}
 			//ein reihen durchlauf
 			//get the current position
 			// TODO: 05.10.16  break if the current position has distance to enemy of 1, aber nicht direkt, sonst
-			//sonst berechne ich nur einen abstand vom gegner, nicht den besten
-			for (Position position : positions) {
+			// todo sonst berechne ich nur einen abstand vom gegner, nicht den besten
+			Iterator<Position> iterator = positions.iterator();
+			while (iterator.hasNext()) {
+				Position position = iterator.next();
 				if (position.getDistanceTo(model.getMonster(myId).getPosition()) == next) {
+					iterator.remove();
 					//get the path to this position
 					Path currentPath = hash.get(position);
-					positions.remove(position);
 					//move arraound
-					// TODO: 04.10.16 vllt in extra methode, wenn PMD zickt
+					// TODO: 05.10.16 tun
+					/*for(Path pfff : hash.values()) {
+						System.out.println("Path:" + pfff);
+						System.out.println("Path.getcurrent:" + pfff.getCurrent());
+						System.out.println("Path.getpath:" + pfff.getThePath());
+					}
+					System.out.println("I GO NOW IN THE DAMNED METHOD");
 					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
 					if (direcionSet == null) {
 						continue;
-					}
-					for (Direction dir : direcionSet) {
+					}*/
+					for (Direction dir : Direction.values()) {
 						//create the current model
 						Path temp = currentPath;
 						// a queue
@@ -102,9 +116,10 @@ public class Dijkstra {
 		}
 	}
 
-	protected Deque<Action> toActionQueue() {
+	Deque<Action> toActionQueue() {
 		allgo();
 		int min = 11;
+		List<Path> movebeside = new LinkedList<>();
 		Path nearestPath = null;
 		for (Path value : hash.values()) {
 			if (value.getCost() > 1000) {
@@ -112,24 +127,42 @@ public class Dijkstra {
 			}
 			//get the nearest path to enemy, not the cheapest
 			if (value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition()) < min) {
+				if(value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
+					movebeside.add(value);
+				}
 				min = value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition());
 				nearestPath = value;
 			}
 		}
+		int minCost = 10000;
+		if(!movebeside.isEmpty()) {
+			for (Path pfd : movebeside) {
+				if(pfd.getCost() < minCost) {
+					minCost = pfd.getCost();
+					nearestPath = pfd;
+				}
+			}
+		}
 		Deque<Action> moves = new LinkedList<>();
 		assert nearestPath != null;
+		boolean bool = true;
 		while (nearestPath.getLastAction() != null) {
 			// add the last action as first one in the queue
+			if(bool){
+				if((model.getField(nearestPath.getCurrent()) instanceof LavaField)) {
+					nearestPath = nearestPath.getThePath();
+					continue;
+				}
+			}
+			bool = false;
 			moves.addFirst(nearestPath.getLastAction());
 			nearestPath = nearestPath.getThePath();
 		}
+
 		return moves;
 	}
 
-	protected Map<Position, Path> getHashResult() {
-		allgo();
-		return hash;
-	}
+
 
 	/**
 	 * diese methode erstellt jeden pfad, setzt die zugehörige position, setzt die kosten auf unendlich,
@@ -137,12 +170,15 @@ public class Dijkstra {
 	 * und die kosten der umliegenden positionen auf die entsprechenden werte sowie lastAction und pfad
 	 */
 	private void initialize() {
+		Position start = model.getMonster(myId).getPosition();
 		for (Position pos : positions) {
 			Path path = new Path(pos, 16384);
 			hash.put(pos, path);
 		}
+
 		//set the costs of startPosition to 0
 		hash.get(start).setCost(0);
+		positions.remove(start);
 		copyModel = model.copy();
 		for (Direction dir : Direction.values()) {
 			Action move = new MoveAction(dir);
@@ -156,13 +192,14 @@ public class Dijkstra {
 				Path toPath = new Path(copyModel.getMonster(myId).getPosition(),
 						1000 - copyModel.getMonster(myId).getEnergy(), hash.get(start), move);
 				//replace it in the hashmap
+
 				hash.replace(copyModel.getMonster(myId).getPosition(), toPath);
 				//do not remove this position
-			}
-			//model zurücksetzen
-			copyModel = this.model.copy();
-		}
 
+				//model zurücksetzen
+				copyModel = this.model.copy();
+			}
+		}
 	}
 
 	/**
@@ -190,10 +227,14 @@ public class Dijkstra {
 		return init;
 	}
 
-	private Set<Direction> getFiveDirections(Action lastMove) {
+	/*private Set<Direction> getFiveDirections(Action lastMove) {
 		ActionVisitorAi visitor = new ActionVisitorAi();
+		System.out.println("action lastmove:" + lastMove);
+		System.out.println("ActionVisitorAi:" + visitor);
 		Direction direction = lastMove.accept(visitor);
+		System.out.println("lastMove.accept(visitor):" + direction);
 		Set<Direction> direcs = new HashSet<>();
+		System.out.println("Set<Direction> direcs" + direcs);
 		switch (direction) {
 			case EAST:
 				direcs.add(Direction.NORTH_EAST);
@@ -241,5 +282,5 @@ public class Dijkstra {
 				return null;
 		}
 		return direcs;
-	}
+	}*/
 }
