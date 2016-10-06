@@ -49,7 +49,7 @@ class Dijkstra {
 		//go trough all positions
 		while (!positions.isEmpty()) {
 			int next = minDist();
-			if (next == 11) {
+			if (next == 6) {
 				break;
 			}
 			//ein reihen durchlauf
@@ -62,47 +62,13 @@ class Dijkstra {
 					//get the path to this position
 					Path currentPath = hash.get(position);
 					//move arraound
-					// TODO: 05.10.16 tun
 					//wurde die position ever erreicht?
 					if (currentPath.getLastAction() == null) {
 						continue;
 					}
+					updateUpdate(currentPath);
 					//get all directions, exept the one which "inverts" the lastAction
-					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
-					for (Direction dir : direcionSet) {
-						//create the current model
-						Path temp = currentPath;
 
-						// a queue
-						//get a queue of actions to reset the model
-						Deque<Action> moves = new LinkedList<>();
-						while (temp.getLastAction() != null) {
-							// add the last action as first one in the queue
-							moves.addFirst(temp.getLastAction());
-							temp = temp.getThePath();
-						}
-						//reset model
-						copyModel = model.copy();
-						//let the monster move to the current position
-						while (!moves.isEmpty()) {
-							//take the first object of the queue and removes it
-							Command command = new ActionCommand(moves.poll(), myId);
-							SimulateController controller = new SimulateController(copyModel);
-							controller.step(command);
-							copyModel = controller.getModel();
-						}
-						//let the monster move forward
-						Action move = new MoveAction(dir);
-						if (move.validate(copyModel, copyModel.getMonster(myId))) {
-							Command command = new ActionCommand(move, myId);
-							SimulateController controller = new SimulateController(copyModel);
-							controller.step(command);
-							copyModel = controller.getModel();
-							Path newPath = new Path(copyModel.getMonster(myId).getPosition(),
-									1000 - copyModel.getMonster(myId).getEnergy(), currentPath, move);
-							distanz_update(newPath);
-						}
-					}
 				}
 			}
 		}
@@ -153,19 +119,59 @@ class Dijkstra {
 	/**
 	 * updates a path
 	 *
-	 * @param to   new path, where i go now
+	 * @param to new path, where i go now
 	 */
 	private void distanz_update(Path to) {
 		int alternativ = to.getCost();
 		if (alternativ < hash.get(to.getCurrent()).getCost()) {
 			//update the costs and path and moveAction
-//			hash.get(to.getCurrent()).setCost(to.getCost());
-//			hash.get(to.getCurrent()).setLastAction(to.getLastAction());
-//			hash.get(to.getCurrent()).setThePath(to.getThePath());
-			hash.replace(to.getCurrent(), to);
-			// TODO: 06.10.16 fix it
+			hash.get(to.getCurrent()).setCost(to.getCost());
+			hash.get(to.getCurrent()).setLastAction(to.getLastAction());
+			hash.get(to.getCurrent()).setThePath(to.getThePath());
+//			hash.replace(to.getCurrent(), to);
+//			updateUpdate(to);
 		}
 	}
+
+	private void updateUpdate(Path prochain) {
+		//get all directions, exept the one which "inverts" the lastAction
+		Set<Direction> direcionSet = getFiveDirections(prochain.getLastAction());
+		for (Direction dir : direcionSet) {
+			//create the current model
+			Path temp = prochain;
+
+			// a queue
+			//get a queue of actions to reset the model
+			Deque<Action> moves = new LinkedList<>();
+			while (temp.getLastAction() != null) {
+				// add the last action as first one in the queue
+				moves.addFirst(temp.getLastAction());
+				temp = temp.getThePath();
+			}
+			//reset model
+			copyModel = model.copy();
+			//let the monster move to the current position
+			while (!moves.isEmpty()) {
+				//take the first object of the queue and removes it
+				Command command = new ActionCommand(moves.poll(), myId);
+				SimulateController controller = new SimulateController(copyModel);
+				controller.step(command);
+				copyModel = controller.getModel();
+			}
+			//let the monster move forward
+			Action move = new MoveAction(dir);
+			if (move.validate(copyModel, copyModel.getMonster(myId))) {
+				Command command = new ActionCommand(move, myId);
+				SimulateController controller = new SimulateController(copyModel);
+				controller.step(command);
+				copyModel = controller.getModel();
+				Path newPath = new Path(copyModel.getMonster(myId).getPosition(),
+						1000 - copyModel.getMonster(myId).getEnergy(), prochain, move);
+				distanz_update(newPath);
+			}
+		}
+	}
+
 
 	private int minDist() {
 		int init = 100000;

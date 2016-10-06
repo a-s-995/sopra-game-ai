@@ -55,8 +55,10 @@ class Pumuckl4 extends Player {
 				break;
 			}
 		}
+
+
 		//to here, nothing to change
-		if(bool) {
+		if (bool) {
 			if (model.getMonster(enemyId).getHealth() < 29 && myMonster.getEnergy() <= 500 &&
 					model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
 				bool = false;
@@ -77,7 +79,7 @@ class Pumuckl4 extends Player {
 			destination1 = goooo.getDestination();
 
 		} else if (myMonster.getHealth() < 80 && model.getMonster(myId).getEnergy() == 1000) {
-			if (destination != null ) {
+			if (destination != null) {
 				if (myMonster.getPosition().equals(destination)) {
 					return getAttack();
 				}
@@ -105,6 +107,7 @@ class Pumuckl4 extends Player {
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions = bestDestination.toActionQueue();
 		}
+		
 		long endTime = System.nanoTime();
 		long duration = (endTime - startTime) / 1000000;
 		System.out.println("the time" + duration);

@@ -55,10 +55,6 @@ class BestDestination {
 			if (value.getCost() > 1000) {
 				continue;
 			}
-			System.out.println("path " + value);
-			System.out.println("thePosition: " + value.getCurrent());
-			System.out.println("the COSTS: " + value.getCost());
-			System.out.println("theLastPath: " + value.getThePath() +"\n");
 			//add all pathes, that have distance one to the destination, into a list
 			if (value.getCurrent().getDistanceTo(destination) == 1) {
 				movebeside.add(value);
