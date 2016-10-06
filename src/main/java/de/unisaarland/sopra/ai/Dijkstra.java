@@ -8,14 +8,12 @@ import de.unisaarland.sopra.commands.Command;
 import de.unisaarland.sopra.controller.SimulateController;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
-import de.unisaarland.sopra.model.fields.LavaField;
 
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,16 +27,14 @@ class Dijkstra {
 	private Model model;
 	private Model copyModel;
 	private int myId;
-	private int enemyId;
-	private Position start;
-	private Position destination;
+//	private int enemyId;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
-	Dijkstra(Model model, int myId, int enemyId) {
+
+	Dijkstra(Model model, int myId) {
 		this.model = model;
 		this.myId = myId;
-		this.enemyId = enemyId;
 		//initialize positions
 		for (int i = 0; i < this.model.getBoard().getWidth(); i++) {
 			for (int j = 0; j < this.model.getBoard().getHeight(); j++) {
@@ -48,19 +44,16 @@ class Dijkstra {
 		}
 	}
 
-
 	private void allgo() {
 		initialize();
 		//go trough all positions
 		while (!positions.isEmpty()) {
 			int next = minDist();
-			if(next == 11) {
+			if (next == 11) {
 				break;
 			}
 			//ein reihen durchlauf
 			//get the current position
-			// TODO: 05.10.16  break if the current position has distance to enemy of 1, aber nicht direkt, sonst
-			// todo sonst berechne ich nur einen abstand vom gegner, nicht den besten
 			Iterator<Position> iterator = positions.iterator();
 			while (iterator.hasNext()) {
 				Position position = iterator.next();
@@ -70,17 +63,14 @@ class Dijkstra {
 					Path currentPath = hash.get(position);
 					//move arraound
 					// TODO: 05.10.16 tun
-					/*for(Path pfff : hash.values()) {
-						System.out.println("Path:" + pfff);
-						System.out.println("Path.getcurrent:" + pfff.getCurrent());
-						System.out.println("Path.getpath:" + pfff.getThePath());
+					System.out.println("I GO not in the bad method");
+					if (currentPath.getLastAction() == null) {
+						continue;
 					}
 					System.out.println("I GO NOW IN THE DAMNED METHOD");
 					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
-					if (direcionSet == null) {
-						continue;
-					}*/
-					for (Direction dir : Direction.values()) {
+					for (Direction dir : direcionSet) {
+						System.out.println("DIRECtion dir" + dir);
 						//create the current model
 						Path temp = currentPath;
 						// a queue
@@ -102,6 +92,7 @@ class Dijkstra {
 						}
 						//let the monster move forward
 						Action move = new MoveAction(dir);
+						System.out.println("MOVE ACTUIN " + move);
 						if (move.validate(copyModel, copyModel.getMonster(myId))) {
 							Command command = new ActionCommand(move, myId);
 							SimulateController controller = new SimulateController(copyModel);
@@ -117,59 +108,10 @@ class Dijkstra {
 		}
 	}
 
-	Deque<Action> toActionQueue() {
+	protected Map<Position, Path> getHashMap() {
 		allgo();
-		int min = 100;
-		System.out.println("1");
-		List<Path> movebeside = new LinkedList<>();
-		Path nearestPath = null;
-		for (Path value : hash.values()) {
-			if (value.getCost() > 1000) {
-				continue;
-			}
-			//get the nearest path to enemy, not the cheapest
-			if (value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition()) < min) {
-				if(value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
-					movebeside.add(value);
-				}
-				min = value.getCurrent().getDistanceTo(model.getMonster(enemyId).getPosition());
-				nearestPath = value;
-			}
-		}
-		System.out.println("nearestPath" + nearestPath);
-		System.out.println("movebeside" + movebeside);
-		int minCost = 10000;
-		if(!movebeside.isEmpty()) {
-			for (Path pfd : movebeside) {
-				if(pfd.getCost() < minCost) {
-					minCost = pfd.getCost();
-					nearestPath = pfd;
-				}
-			}
-		}
-		System.out.println("nearestPath near enemy" + nearestPath);
-		Deque<Action> moves = new LinkedList<>();
-		assert nearestPath != null;
-		boolean bool = true;
-		System.out.println("4");
-		while (nearestPath.getLastAction() != null) {
-			// add the last action as first one in the queue
-			if(bool){
-				if((model.getField(nearestPath.getCurrent()) instanceof LavaField)) {
-					nearestPath = nearestPath.getThePath();
-					continue;
-				}
-			}
-			bool = false;
-			moves.addFirst(nearestPath.getLastAction());
-			nearestPath = nearestPath.getThePath();
-		}
-
-		System.out.println("moves" + moves);
-		return moves;
+		return hash;
 	}
-
-
 
 	/**
 	 * diese methode erstellt jeden pfad, setzt die zugehörige position, setzt die kosten auf unendlich,
@@ -234,7 +176,11 @@ class Dijkstra {
 		return init;
 	}
 
-	/*private Set<Direction> getFiveDirections(Action lastMove) {
+
+	private Set<Direction> getFiveDirections(Action lastMove) {
+		if(lastMove == null) {
+			return null;
+		}
 		ActionVisitorAi visitor = new ActionVisitorAi();
 		System.out.println("action lastmove:" + lastMove);
 		System.out.println("ActionVisitorAi:" + visitor);
@@ -244,50 +190,51 @@ class Dijkstra {
 		System.out.println("Set<Direction> direcs" + direcs);
 		switch (direction) {
 			case EAST:
+				direcs.add(Direction.EAST);
 				direcs.add(Direction.NORTH_EAST);
 				direcs.add(Direction.NORTH_WEST);
-				direcs.add(Direction.WEST);
 				direcs.add(Direction.SOUTH_WEST);
 				direcs.add(Direction.SOUTH_EAST);
 				break;
 			case NORTH_EAST:
 				direcs.add(Direction.EAST);
+				direcs.add(Direction.NORTH_EAST);
 				direcs.add(Direction.NORTH_WEST);
 				direcs.add(Direction.WEST);
-				direcs.add(Direction.SOUTH_WEST);
 				direcs.add(Direction.SOUTH_EAST);
 				break;
 			case NORTH_WEST:
 				direcs.add(Direction.EAST);
 				direcs.add(Direction.NORTH_EAST);
+				direcs.add(Direction.NORTH_WEST);
 				direcs.add(Direction.WEST);
 				direcs.add(Direction.SOUTH_WEST);
-				direcs.add(Direction.SOUTH_EAST);
 				break;
 			case WEST:
-				direcs.add(Direction.EAST);
 				direcs.add(Direction.NORTH_EAST);
 				direcs.add(Direction.NORTH_WEST);
+				direcs.add(Direction.WEST);
 				direcs.add(Direction.SOUTH_WEST);
 				direcs.add(Direction.SOUTH_EAST);
 				break;
 			case SOUTH_WEST:
 				direcs.add(Direction.EAST);
-				direcs.add(Direction.NORTH_EAST);
 				direcs.add(Direction.NORTH_WEST);
 				direcs.add(Direction.WEST);
+				direcs.add(Direction.SOUTH_WEST);
 				direcs.add(Direction.SOUTH_EAST);
 				break;
 			case SOUTH_EAST:
 				direcs.add(Direction.EAST);
 				direcs.add(Direction.NORTH_EAST);
-				direcs.add(Direction.NORTH_WEST);
 				direcs.add(Direction.WEST);
 				direcs.add(Direction.SOUTH_WEST);
+				direcs.add(Direction.SOUTH_EAST);
 				break;
 			default:
 				return null;
 		}
+		System.out.println("Set<Direction> direcsof all directions " + direcs);
 		return direcs;
-	}*/
+	}
 }

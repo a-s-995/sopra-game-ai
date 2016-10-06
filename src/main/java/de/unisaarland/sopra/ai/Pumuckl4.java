@@ -5,32 +5,43 @@ import de.unisaarland.sopra.actions.Action;
 import de.unisaarland.sopra.actions.SlashAttack;
 import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.model.Model;
+import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
+import de.unisaarland.sopra.model.fields.BushField;
+import de.unisaarland.sopra.model.fields.Field;
 import de.unisaarland.sopra.view.Player;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * Created by Antoine on 05.10.16.
  * <p>
  * project Anti
  */
-public class Pumuckl4 extends Player{
+class Pumuckl4 extends Player {
 	private Queue<Action> actions = new LinkedList<>();
 	private int myId;
 	private int enemyId;
 	private Monster myMonster;
+	private Set<Position> bushFields = new HashSet<>();
 
 
-
-	public Pumuckl4(Model model) {
+	Pumuckl4(Model model) {
 		super(model);
 	}
 
 	@Override
 	public Action act() {
+		// TODO: 05.10.16  wait the first 2 rounds :D
+		if(model.getRoundCount() == 1) {
+			return null;
+		}
+
 		myId = getActorId();
 		myMonster = model.getMonster(myId);
 		List<Monster> monsters = model.getMonsters();
@@ -40,17 +51,40 @@ public class Pumuckl4 extends Player{
 				break;
 			}
 		}
-		if(model.getMonster(myId).getEnergy() == 1000
-				&& !(model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1)) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, this.enemyId);
-			actions = dijkstra.toActionQueue();
+		//to here, nothing to change
+		if(myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId);
+			BestDestination goooo = new BestDestination(dijkstra.getHashMap(), model,
+					model.getActiveHealingFields(), enemyId);
+			actions = goooo.toActionQueueNotBeside();
+
 		}
-		if(model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
+		else if(myMonster.getHealth() < 80 && model.getMonster(myId).getEnergy() == 1000) {
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId);
+			Collection<Position> potitions = new LinkedList<>();
+			potitions.addAll(model.getActiveHealingFields());
+			if(bushes()) {
+				potitions.addAll(bushFields);
+			}
+			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model,
+					potitions, enemyId);
+			actions = bestDestination.toActionQueueNotBeside();
+		}
+		Action act = actions.poll();
+		if(act != null) {
+			return act;
+		}
+		if (model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
 			return getAttack();
 		}
+		if (model.getMonster(myId).getEnergy() == 1000) {
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId);
+			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
+			actions = bestDestination.toActionQueue();
+		}
 		return actions.poll();
-	}
 
+	}
 
 	private Action getAttack() {
 		//avoide dass der moved wenn er einfach nur auf cursed steht
@@ -77,4 +111,29 @@ public class Pumuckl4 extends Player{
 		}
 		return new StabAttack(direction);
 	}
+
+	// TODO: 05.10.16 adding phases : moveEnemy -> MoveBush at distance of 5 to enemy; wait one round on bush; attack; heal
+	// //
+
+
+
+
+
+	/**
+	 * initialises a list with all bushfields
+	 *
+	 * @return {@code true} if there are bushfields on the map, else false
+	 */
+	private boolean bushes() {
+		Field[][] fields = model.getBoard().getFields();
+		for (int i = 0; i < model.getBoard().getWidth(); i++) {
+			for (int j = 0; j < model.getBoard().getHeight(); j++) {
+				if (fields[i][j] instanceof BushField) {
+					bushFields.add(fields[i][j].getPosition());
+				}
+			}
+		}
+		return !bushFields.isEmpty();
+	}
+
 }
