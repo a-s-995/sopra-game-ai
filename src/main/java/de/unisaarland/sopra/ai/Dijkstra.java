@@ -63,14 +63,18 @@ class Dijkstra {
 					Path currentPath = hash.get(position);
 					//move arraound
 					// TODO: 05.10.16 tun
+					//wurde die position ever erreicht?
 					if (currentPath.getLastAction() == null) {
 						continue;
 					}
+					//get all directions, exept the one which "inverts" the lastAction
 					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
 					for (Direction dir : direcionSet) {
 						//create the current model
 						Path temp = currentPath;
+
 						// a queue
+						//get a queue of actions to reset the model
 						Deque<Action> moves = new LinkedList<>();
 						while (temp.getLastAction() != null) {
 							// add the last action as first one in the queue
@@ -96,7 +100,7 @@ class Dijkstra {
 							copyModel = controller.getModel();
 							Path newPath = new Path(copyModel.getMonster(myId).getPosition(),
 									1000 - copyModel.getMonster(myId).getEnergy(), currentPath, move);
-							distanz_update(currentPath, newPath);
+							distanz_update(newPath);
 						}
 					}
 				}
@@ -149,15 +153,17 @@ class Dijkstra {
 	/**
 	 * updates a path
 	 *
-	 * @param from the last path, from where i come
 	 * @param to   new path, where i go now
 	 */
-	private void distanz_update(Path from, Path to) {
-		int vonAnachB = to.getCost() - from.getCost();
-		int alternativ = from.getCost() + vonAnachB;
+	private void distanz_update(Path to) {
+		int alternativ = to.getCost();
 		if (alternativ < hash.get(to.getCurrent()).getCost()) {
 			//update the costs and path and moveAction
+//			hash.get(to.getCurrent()).setCost(to.getCost());
+//			hash.get(to.getCurrent()).setLastAction(to.getLastAction());
+//			hash.get(to.getCurrent()).setThePath(to.getThePath());
 			hash.replace(to.getCurrent(), to);
+			// TODO: 06.10.16 fix it
 		}
 	}
 
@@ -177,12 +183,8 @@ class Dijkstra {
 			return null;
 		}
 		ActionVisitorAi visitor = new ActionVisitorAi();
-		System.out.println("action lastmove:" + lastMove);
-		System.out.println("ActionVisitorAi:" + visitor);
 		Direction direction = lastMove.accept(visitor);
-		System.out.println("lastMove.accept(visitor):" + direction);
 		Set<Direction> direcs = new HashSet<>();
-		System.out.println("Set<Direction> direcs" + direcs);
 		switch (direction) {
 			case EAST:
 				direcs.add(Direction.EAST);
@@ -229,7 +231,6 @@ class Dijkstra {
 			default:
 				return null;
 		}
-		System.out.println("Set<Direction> direcsof all directions " + direcs);
 		return direcs;
 	}
 }

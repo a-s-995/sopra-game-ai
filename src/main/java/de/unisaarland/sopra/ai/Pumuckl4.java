@@ -32,6 +32,7 @@ class Pumuckl4 extends Player {
 	private Position destination1;
 	private Set<Position> bushFields = new HashSet<>();
 
+	private boolean bool = true;
 
 	Pumuckl4(Model model) {
 		super(model);
@@ -39,6 +40,7 @@ class Pumuckl4 extends Player {
 
 	@Override
 	public Action act() {
+		long startTime = System.nanoTime();
 		// TODO: 05.10.16  wait the first 2 rounds :D
 		if (model.getRoundCount() == 1) {
 			return null;
@@ -54,7 +56,13 @@ class Pumuckl4 extends Player {
 			}
 		}
 		//to here, nothing to change
-
+		if(bool) {
+			if (model.getMonster(enemyId).getHealth() < 29 && myMonster.getEnergy() <= 500 &&
+					model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
+				bool = false;
+				return null;
+			}
+		}
 
 		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
 			if (destination1 != null) {
@@ -97,6 +105,9 @@ class Pumuckl4 extends Player {
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions = bestDestination.toActionQueue();
 		}
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime) / 1000000;
+		System.out.println("the time" + duration);
 		return actions.poll();
 
 	}

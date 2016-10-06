@@ -47,7 +47,7 @@ class BestDestination {
 	 */
 	Deque<Action> toActionQueue() {
 //		allgo();
-		int min = 1000;
+		int min = 1001;
 		destination = model.getMonster(enemyId).getPosition();
 		List<Path> movebeside = new LinkedList<>();
 		Path nearestPath = null;
@@ -59,12 +59,13 @@ class BestDestination {
 			System.out.println("thePosition: " + value.getCurrent());
 			System.out.println("the COSTS: " + value.getCost());
 			System.out.println("theLastPath: " + value.getThePath() +"\n");
+			//add all pathes, that have distance one to the destination, into a list
+			if (value.getCurrent().getDistanceTo(destination) == 1) {
+				movebeside.add(value);
+			}
 			//get the nearest path to enemy, not the cheapest
 			if (value.getCurrent().getDistanceTo(destination) < min) {
 				//add all pathes, that have distance one to the destination, into a list
-				if (value.getCurrent().getDistanceTo(destination) == 1) {
-					movebeside.add(value);
-				}
 				min = value.getCurrent().getDistanceTo(destination);
 				nearestPath = value;
 			}

@@ -14,7 +14,7 @@ class Path {
 	//die kosten zu dieser position
 	private int cost;
 	//der vorausgehende pfad, zum feld davor
-	private Path thePath;
+	private Path theLastPath;
 	//from this Action, i get from where i come from
 	private Action lastAction;
 
@@ -27,7 +27,7 @@ class Path {
 	Path(Position current, int cost, Path thePath, Action lastAction) {
 		this.current = current;
 		this.cost = cost;
-		this.thePath = thePath;
+		this.theLastPath = thePath;
 		this.lastAction = lastAction;
 	}
 
@@ -40,7 +40,7 @@ class Path {
 	}
 
 	Path getThePath() {
-		return thePath;
+		return theLastPath;
 	}
 
 	Action getLastAction() {
@@ -51,13 +51,13 @@ class Path {
 		this.cost = cost;
 	}
 
-//	public void setThePath(Path thePath) {
-//		this.thePath = thePath;
-//	}
+	public void setThePath(Path thePath) {
+		this.theLastPath = thePath;
+	}
 
-//	public void setLastAction(Action lastAction) {
-//		this.lastAction = lastAction;
-//	}
+	public void setLastAction(Action lastAction) {
+		this.lastAction = lastAction;
+	}
 	//new simulate controller a
 	//a.step(command)
 	//b = a.getmodel
