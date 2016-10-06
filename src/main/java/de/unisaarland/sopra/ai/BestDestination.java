@@ -35,7 +35,7 @@ public class BestDestination {
 		this.model = model;
 		this.enemyId = enemyId;
 		this.fieldsPos = fieldsPos;
-		}
+	}
 
 	public BestDestination(Map<Position, Path> hash, Model model, int enemyId) {
 		this.hash = hash;
@@ -84,13 +84,14 @@ public class BestDestination {
 
 	/**
 	 * this method is called, if i want to move ON the destination
-	 *
+	 * <p>
 	 * if there is no destination, this method will lead beside the enemy
+	 *
 	 * @return a deque
 	 */
 	Deque<Action> toActionQueueNotBeside() {
 //		allgo();
-		if(calculateDestination()) {
+		if (calculateDestination()) {
 			int min = 1000;
 			Path nearestPath = null;
 			for (Path value : hash.values()) {
@@ -136,13 +137,16 @@ public class BestDestination {
 		return moves;
 	}
 
+	protected Position getDestination() {
+		return destination;
+	}
 
 	protected boolean calculateDestination() {
 		int cost = 1001;
 		boolean hasDestination = false;
-		for(Position position : fieldsPos) {
-			for(Map.Entry<Position, Path> pf : hash.entrySet()) {
-				if(position.equals(pf.getValue().getCurrent()) && (pf.getValue().getCost() < cost)) {
+		for (Position position : fieldsPos) {
+			for (Map.Entry<Position, Path> pf : hash.entrySet()) {
+				if (position.equals(pf.getValue().getCurrent()) && (pf.getValue().getCost() < cost)) {
 					cost = pf.getValue().getCost();
 					destination = position;
 					hasDestination = true;

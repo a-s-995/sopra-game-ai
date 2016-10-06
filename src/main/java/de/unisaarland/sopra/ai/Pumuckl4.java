@@ -9,6 +9,7 @@ import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
 import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
+import de.unisaarland.sopra.model.fields.HealingField;
 import de.unisaarland.sopra.view.Player;
 
 import java.util.Collection;
@@ -28,6 +29,8 @@ class Pumuckl4 extends Player {
 	private int myId;
 	private int enemyId;
 	private Monster myMonster;
+	private Position destination;
+	private Position destination1;
 	private Set<Position> bushFields = new HashSet<>();
 
 
@@ -38,7 +41,7 @@ class Pumuckl4 extends Player {
 	@Override
 	public Action act() {
 		// TODO: 05.10.16  wait the first 2 rounds :D
-		if(model.getRoundCount() == 1) {
+		if (model.getRoundCount() == 1) {
 			return null;
 		}
 
@@ -52,26 +55,37 @@ class Pumuckl4 extends Player {
 			}
 		}
 		//to here, nothing to change
-		if(myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
+		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
+			if (destination1 != null) {
+				if (myMonster.getPosition().equals(destination1)) {
+					return getAttack();
+				}
+			}
 			Dijkstra dijkstra = new Dijkstra(this.model, this.myId);
 			BestDestination goooo = new BestDestination(dijkstra.getHashMap(), model,
 					model.getActiveHealingFields(), enemyId);
 			actions = goooo.toActionQueueNotBeside();
+			destination1 = goooo.getDestination();
 
-		}
-		else if(myMonster.getHealth() < 80 && model.getMonster(myId).getEnergy() == 1000) {
+		} else if (myMonster.getHealth() < 80 && model.getMonster(myId).getEnergy() == 1000) {
+			if (destination != null) {
+				if (myMonster.getPosition().equals(destination)) {
+					return getAttack();
+				}
+			}
 			Dijkstra dijkstra = new Dijkstra(this.model, this.myId);
 			Collection<Position> potitions = new LinkedList<>();
 			potitions.addAll(model.getActiveHealingFields());
-			if(bushes()) {
+			if (bushes()) {
 				potitions.addAll(bushFields);
 			}
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model,
 					potitions, enemyId);
 			actions = bestDestination.toActionQueueNotBeside();
+			destination = bestDestination.getDestination();
 		}
 		Action act = actions.poll();
-		if(act != null) {
+		if (act != null) {
 			return act;
 		}
 		if (model.getMonster(myId).getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
@@ -85,6 +99,7 @@ class Pumuckl4 extends Player {
 		return actions.poll();
 
 	}
+
 
 	private Action getAttack() {
 		//avoide dass der moved wenn er einfach nur auf cursed steht
@@ -114,9 +129,6 @@ class Pumuckl4 extends Player {
 
 	// TODO: 05.10.16 adding phases : moveEnemy -> MoveBush at distance of 5 to enemy; wait one round on bush; attack; heal
 	// //
-
-
-
 
 
 	/**

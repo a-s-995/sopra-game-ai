@@ -27,7 +27,7 @@ class Dijkstra {
 	private Model model;
 	private Model copyModel;
 	private int myId;
-//	private int enemyId;
+	//	private int enemyId;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
@@ -178,7 +178,7 @@ class Dijkstra {
 
 
 	private Set<Direction> getFiveDirections(Action lastMove) {
-		if(lastMove == null) {
+		if (lastMove == null) {
 			return null;
 		}
 		ActionVisitorAi visitor = new ActionVisitorAi();
