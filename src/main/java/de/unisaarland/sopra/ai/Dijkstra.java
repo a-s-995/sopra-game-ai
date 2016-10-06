@@ -63,14 +63,11 @@ class Dijkstra {
 					Path currentPath = hash.get(position);
 					//move arraound
 					// TODO: 05.10.16 tun
-					System.out.println("I GO not in the bad method");
 					if (currentPath.getLastAction() == null) {
 						continue;
 					}
-					System.out.println("I GO NOW IN THE DAMNED METHOD");
 					Set<Direction> direcionSet = getFiveDirections(currentPath.getLastAction());
 					for (Direction dir : direcionSet) {
-						System.out.println("DIRECtion dir" + dir);
 						//create the current model
 						Path temp = currentPath;
 						// a queue
@@ -92,7 +89,6 @@ class Dijkstra {
 						}
 						//let the monster move forward
 						Action move = new MoveAction(dir);
-						System.out.println("MOVE ACTUIN " + move);
 						if (move.validate(copyModel, copyModel.getMonster(myId))) {
 							Command command = new ActionCommand(move, myId);
 							SimulateController controller = new SimulateController(copyModel);
@@ -108,7 +104,7 @@ class Dijkstra {
 		}
 	}
 
-	protected Map<Position, Path> getHashMap() {
+	Map<Position, Path> getHashMap() {
 		allgo();
 		return hash;
 	}
@@ -141,7 +137,6 @@ class Dijkstra {
 				Path toPath = new Path(copyModel.getMonster(myId).getPosition(),
 						1000 - copyModel.getMonster(myId).getEnergy(), hash.get(start), move);
 				//replace it in the hashmap
-
 				hash.replace(copyModel.getMonster(myId).getPosition(), toPath);
 				//do not remove this position
 

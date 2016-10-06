@@ -7,37 +7,34 @@ import de.unisaarland.sopra.model.fields.LavaField;
 import de.unisaarland.sopra.model.fields.WaterField;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Antoine on 06.10.16.
  * <p>
  * project Anti
  */
-public class BestDestination {
+class BestDestination {
 
 	private Map<Position, Path> hash = new HashMap<>();
 	private Model model;
 	int enemyId;
-	//the healingfields AND bushFields
+	//the healingfields AND maybe bushFields
 	private Collection<Position> fieldsPos;
 	private Position destination;
-	int myHealth;
 
-	public BestDestination(Map<Position, Path> hash, Model model, Collection<Position> fieldsPos, int enemyId) {
+	BestDestination(Map<Position, Path> hash, Model model, Collection<Position> fieldsPos, int enemyId) {
 		this.hash = hash;
 		this.model = model;
 		this.enemyId = enemyId;
 		this.fieldsPos = fieldsPos;
 	}
 
-	public BestDestination(Map<Position, Path> hash, Model model, int enemyId) {
+	BestDestination(Map<Position, Path> hash, Model model, int enemyId) {
 		this.hash = hash;
 		this.model = model;
 		this.enemyId = enemyId;
@@ -58,6 +55,10 @@ public class BestDestination {
 			if (value.getCost() > 1000) {
 				continue;
 			}
+			System.out.println("path " + value);
+			System.out.println("thePosition: " + value.getCurrent());
+			System.out.println("the COSTS: " + value.getCost());
+			System.out.println("theLastPath: " + value.getThePath() +"\n");
 			//get the nearest path to enemy, not the cheapest
 			if (value.getCurrent().getDistanceTo(destination) < min) {
 				//add all pathes, that have distance one to the destination, into a list
@@ -137,11 +138,11 @@ public class BestDestination {
 		return moves;
 	}
 
-	protected Position getDestination() {
+	Position getDestination() {
 		return destination;
 	}
 
-	protected boolean calculateDestination() {
+	private boolean calculateDestination() {
 		int cost = 1001;
 		boolean hasDestination = false;
 		for (Position position : fieldsPos) {
@@ -154,11 +155,6 @@ public class BestDestination {
 			}
 		}
 		return hasDestination;
-	}
-
-
-	public void setFieldsPos(Set<Position> fieldsPos) {
-		this.fieldsPos = fieldsPos;
 	}
 }
 

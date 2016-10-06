@@ -9,7 +9,6 @@ import de.unisaarland.sopra.model.Position;
 import de.unisaarland.sopra.model.entities.Monster;
 import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
-import de.unisaarland.sopra.model.fields.HealingField;
 import de.unisaarland.sopra.view.Player;
 
 import java.util.Collection;
@@ -55,6 +54,8 @@ class Pumuckl4 extends Player {
 			}
 		}
 		//to here, nothing to change
+
+
 		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
 			if (destination1 != null) {
 				if (myMonster.getPosition().equals(destination1)) {
@@ -68,7 +69,7 @@ class Pumuckl4 extends Player {
 			destination1 = goooo.getDestination();
 
 		} else if (myMonster.getHealth() < 80 && model.getMonster(myId).getEnergy() == 1000) {
-			if (destination != null) {
+			if (destination != null ) {
 				if (myMonster.getPosition().equals(destination)) {
 					return getAttack();
 				}
@@ -147,5 +148,4 @@ class Pumuckl4 extends Player {
 		}
 		return !bushFields.isEmpty();
 	}
-
 }
