@@ -111,13 +111,13 @@ abstract class Planning {
 				//if its valid, then get the neighbourFields position in the direction
 				Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
 
-				//dont stop on this, if its an lava or waterfield
+				/*//dont stop on this, if its an lava or waterfield
 				if (!wouldStopOnThis(position)) {
 					continue;
 				}
 				if (!wouldAttackFromThis(position)) {
 					continue;
-				}
+				}*/
 				//and from this position, get the distance to where i want to go, and look if it is lower than before
 				if (position.getDistanceTo(whereIWantToGo) < oldDistance) {
 					//if its lower, return this move from which myMonster is closer to the enemy
@@ -159,13 +159,13 @@ abstract class Planning {
 	 */
 	Action getAttack() {
 		//avoide dass der moved wenn er einfach nur auf cursed steht
-		if (model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1) {
+		//if (model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1) {
 			for (Direction direction : Direction.values()) {
 				//should i better move to an adjacent position to attack (if i am on cursed Field or water)
-				Action moveadjacent = getMoveToAdjacentDirection(direction);
+				/*Action moveadjacent = getMoveToAdjacentDirection(direction);
 				if (moveadjacent != null) {
 					return moveadjacent;
-				}
+				}*/
 				Action attack = whichAttack(direction);
 				if (attack.validate(model, myMonster)) {
 					if (model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition()
@@ -173,7 +173,7 @@ abstract class Planning {
 						return attack;
 					}
 				}
-			}
+
 		}
 		return null;
 	}

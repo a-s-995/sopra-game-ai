@@ -31,9 +31,9 @@ class PlanMoveEnemy extends Planning {
 
 
 	protected Action whichAttack(Direction direction) {
-		if (myMonster.getEnergy() == 900 || myMonster.getEnergy() == 480 || myMonster.getEnergy() == 700) {
+		/*if (myMonster.getEnergy() == 900 || myMonster.getEnergy() == 480 || myMonster.getEnergy() == 700) {
 			return new SlashAttack(direction);
-		}
+		}*/
 		return new StabAttack(direction);
 	}
 }

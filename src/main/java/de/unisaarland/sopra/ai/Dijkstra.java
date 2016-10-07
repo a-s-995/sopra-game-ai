@@ -31,9 +31,11 @@ class Dijkstra {
 	//	private int enemyId;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
+	private boolean update;
 
 
-	Dijkstra(Model model, int myId, int deepnessAlgortighm) {
+	Dijkstra(Model model, int myId, int deepnessAlgortighm, boolean update) {
+		this.update = update;
 		this.model = model;
 		this.myId = myId;
 		this.deepnessAlgortighm = deepnessAlgortighm;
@@ -136,7 +138,9 @@ class Dijkstra {
 			hash.get(to.getCurrent()).setLastAction(to.getLastAction());
 			hash.get(to.getCurrent()).setThePath(to.getThePath());
 //			hash.replace(to.getCurrent(), to);
-//			updateUpdate(to);
+			if (update) {
+				updateUpdate(to);
+			}
 		}
 	}
 

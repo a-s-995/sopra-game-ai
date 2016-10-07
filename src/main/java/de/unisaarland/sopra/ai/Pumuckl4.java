@@ -38,6 +38,7 @@ class Pumuckl4 extends Player {
 	private Position bestDestPos;
 	private int howLong = 0;
 	private Set<Position> bushFields = new HashSet<>();
+	private boolean update = false;
 
 	private boolean slashhim = true;
 	private boolean onceOnBestField = true;
@@ -85,7 +86,10 @@ class Pumuckl4 extends Player {
 				break;
 			}
 		}
-		if (model.getBoredom() == 30) {
+		if(model.getBoredom() == 30) {
+			update = true;
+		}
+		if (model.getBoredom() == 50) {
 			this.currentPhase = thePhase.NOT_BOREDOM;
 			howLong = 2;
 		}
@@ -150,7 +154,7 @@ class Pumuckl4 extends Player {
 			return getAttack();
 		}
 		if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 9);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 9, update);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions = bestDestination.toActionQueue();
 		}
@@ -175,7 +179,7 @@ class Pumuckl4 extends Player {
 				bushAndHeal.addAll(bushFields);
 			}
 			if (!bushAndHeal.isEmpty()) {
-				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 8);
+				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 8, update);
 				BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model,
 						bushAndHeal, enemyId);
 				actions.clear();
@@ -187,9 +191,9 @@ class Pumuckl4 extends Player {
 				}
 			}
 		}
-		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
+		if (myMonster.getHealth() < 60 && model.getMonster(myId).getEnergy() == 1000) {
 			if (!model.getActiveHealingFields().isEmpty()) {
-				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11);
+				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11, update);
 				BestDestination justHeal = new BestDestination(dijkstra.getHashMap(), model,
 						model.getActiveHealingFields(), enemyId);
 				actions.clear();
@@ -212,7 +216,7 @@ class Pumuckl4 extends Player {
 		}
 		//else move to enemy, but not if you already moved back
 		else if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 5);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 5, update);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions.clear();
 			actions = bestDestination.toActionQueue();
@@ -380,14 +384,6 @@ class Pumuckl4 extends Player {
 		if(myMonster.getEnergy() == 1000) {
 			howLong--;
 		}
-
-
-
-
-
-
-
-
 
 		//distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		System.out.println("currentPhase:" + currentPhase);
