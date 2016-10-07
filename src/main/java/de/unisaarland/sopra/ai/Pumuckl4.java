@@ -85,8 +85,9 @@ class Pumuckl4 extends Player {
 				break;
 			}
 		}
-		if (model.getBoredom() >= 30) {
+		if (model.getBoredom() == 30) {
 			this.currentPhase = thePhase.NOT_BOREDOM;
+			howLong = 2;
 		}
 		//to here, nothing to change
 
@@ -372,10 +373,27 @@ class Pumuckl4 extends Player {
 	}
 
 	private Action handleBoredom() {
+		if(howLong == 0) {
+			this.currentPhase = thePhase.ATTACK;
+			return attackPhase();
+		}
+		if(myMonster.getEnergy() == 1000) {
+			howLong--;
+		}
+
+
+
+
+
+
+
+
+
 		//distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		System.out.println("currentPhase:" + currentPhase);
-		return handlePhase2();
+		return moveToEnemyPhase2();
 	}
+
 
 
 
@@ -482,7 +500,7 @@ class Pumuckl4 extends Player {
 			if(myMonster.getEnergy() >= 250) {
 				return move.getAttack();
 			}
-			setCurrentPhase2(MyPhase.ATTACK);
+//			setCurrentPhase2(MyPhase.ATTACK);
 			return null;
 			//are there bushes?
 			//bushFields.isEmpty()
