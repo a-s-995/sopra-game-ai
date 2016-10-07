@@ -2,6 +2,7 @@ package de.unisaarland.sopra.ai;
 
 import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
+import de.unisaarland.sopra.actions.Attack;
 import de.unisaarland.sopra.actions.MoveAction;
 import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.commands.ActionCommand;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -38,7 +40,6 @@ class Pumuckl4 extends Player {
 	private Position bestDestPos;
 	private int howLong = 0;
 	private Set<Position> bushFields = new HashSet<>();
-	private boolean update = false;
 
 	private boolean slashhim = true;
 	private boolean onceOnBestField = true;
@@ -86,12 +87,8 @@ class Pumuckl4 extends Player {
 				break;
 			}
 		}
-		if(model.getBoredom() == 30) {
-			update = true;
-		}
-		if (model.getBoredom() == 50) {
+		if (model.getBoredom() == 2) {
 			this.currentPhase = thePhase.NOT_BOREDOM;
-			howLong = 2;
 		}
 		//to here, nothing to change
 
@@ -154,7 +151,7 @@ class Pumuckl4 extends Player {
 			return getAttack();
 		}
 		if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 9, update);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 9);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions = bestDestination.toActionQueue();
 		}
@@ -179,7 +176,7 @@ class Pumuckl4 extends Player {
 				bushAndHeal.addAll(bushFields);
 			}
 			if (!bushAndHeal.isEmpty()) {
-				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 8, update);
+				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 8);
 				BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model,
 						bushAndHeal, enemyId);
 				actions.clear();
@@ -193,7 +190,7 @@ class Pumuckl4 extends Player {
 		}
 		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
 			if (!model.getActiveHealingFields().isEmpty()) {
-				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11, update);
+				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11);
 				BestDestination justHeal = new BestDestination(dijkstra.getHashMap(), model,
 						model.getActiveHealingFields(), enemyId);
 				actions.clear();
@@ -216,7 +213,7 @@ class Pumuckl4 extends Player {
 		}
 		//else move to enemy, but not if you already moved back
 		else if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 5, update);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 5);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions.clear();
 			actions = bestDestination.toActionQueue();
@@ -377,17 +374,19 @@ class Pumuckl4 extends Player {
 	}
 
 	private Action handleBoredom() {
-		if(howLong == 0) {
-			this.currentPhase = thePhase.ATTACK;
-			return attackPhase();
-		}
-		if(myMonster.getEnergy() == 1000) {
-			howLong--;
+		if(myMonster.getPosition().getDistanceTo(model.getMonster(enemyId).getPosition()) == 1) {
+			return getAttack();
 		}
 
-		//distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
-		System.out.println("currentPhase:" + currentPhase);
-		return moveToEnemyPhase2();
+		Action[] allMove =  myMonster.planMoves(model).toArray(new MoveAction[0]);
+
+		// check if no move action may be performed
+		if (allMove.length == 0) {
+			return null;
+		}
+		Random random = new Random();
+		return allMove[random.nextInt(allMove.length)];
+			
 	}
 
 
