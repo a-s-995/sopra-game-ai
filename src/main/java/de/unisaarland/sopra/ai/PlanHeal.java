@@ -32,7 +32,6 @@ public class PlanHeal extends Planning {
 
 		this.healinAciton = getBestMove(healinField);
 	}
-
 	@Override
 	protected Action whichAttack(Direction direction) {
 		if (model.getMonster(enemyId).getHealth() <= 54 && model.getMonster(enemyId).getHealth() >= 42

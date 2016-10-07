@@ -2,7 +2,6 @@ package de.unisaarland.sopra.ai;
 
 import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
-import de.unisaarland.sopra.actions.MoveAction;
 import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.model.Model;
 import de.unisaarland.sopra.model.Position;
@@ -47,11 +46,11 @@ class PlanMoveBush extends Planning {
 			}
 		}
 		// schaumal, obs buschfeld hinter dem feind liegt
-		if (closestBush.getDistanceTo(myMonster.getPosition()) >
+		if(closestBush.getDistanceTo(myMonster.getPosition()) >
 				closestBush.getDistanceTo(model.getMonster(enemyId).getPosition())) {
-			if (myMonster.getEnergy() == 500 || myMonster.getEnergy() == 250) {
+			if(myMonster.getEnergy() == 500 || myMonster.getEnergy() == 250) {
 				//kann zum gegner hinlaufen, nicht blockiert
-				if (!canMoveToBush(closestBush)) {
+				if(!canMoveToBush(closestBush)) {
 					this.moveAct = getAttack();
 					return;
 					// TODO: 01.10.16  schau jetzt mal das der was gescheites macht!!!!
@@ -59,30 +58,6 @@ class PlanMoveBush extends Planning {
 			}
 		}
 		this.moveAct = getBestMove(closestBush);
-	}
-
-	private Boolean canMoveToBush(Position whereIWantToGo) {
-		//the distance to whereIWantToGo, if myMonster moves to it, this has to decrease
-		int oldDistance = whereIWantToGo.getDistanceTo(myMonster.getPosition());
-
-		//go through all directions
-		for (Direction direction : Direction.values()) {
-			Action move = new MoveAction(direction);
-
-			//first, is a move in this direction valid?
-			if (move.validate(model, myMonster)) {
-
-				//if its valid, then get the neighbourFields position in the direction
-				Position position = model.getBoard().getNeighbour(myMonster.getPosition(), direction).getPosition();
-
-				//and from this position, get the distance to where i want to go, and look if it is lower than before
-				if (position.getDistanceTo(whereIWantToGo) <= oldDistance) {
-					//if its lower, return this move from which myMonster is closer to the enemy
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	protected Action whichAttack(Direction direction) {

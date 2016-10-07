@@ -45,7 +45,7 @@ class Pumuckl4 extends Player {
 	private thePhase currentPhase = thePhase.MOVE_TO_ENEMY;
 
 	private enum thePhase {
-		MOVE_TO_ENEMY, ATTACK, WAIT, HEAL, BEST_POS
+		MOVE_TO_ENEMY, ATTACK, WAIT, HEAL, BEST_POS, NOT_BOREDOM
 	}
 
 	Pumuckl4(Model model) {
@@ -69,6 +69,9 @@ class Pumuckl4 extends Player {
 				enemyId = monster.getId();
 				break;
 			}
+		}
+		if (model.getBoredom() >= 30) {
+			this.currentPhase = thePhase.NOT_BOREDOM;
 		}
 		//to here, nothing to change
 
@@ -108,6 +111,8 @@ class Pumuckl4 extends Player {
 				return waitPhase();
 			case ATTACK:
 				return attackPhase();
+			case NOT_BOREDOM:
+				return handleBoredom();
 			default:
 				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
 				return null;
@@ -346,5 +351,10 @@ class Pumuckl4 extends Player {
 		//falls wir gleichviel energy verbraucht haben,
 		List<Integer> actingOrder = model.getActingOrder();
 		return actingOrder.indexOf(myId) > actingOrder.indexOf(enemyId);
+	}
+
+	private Action handleBoredom() {
+		Pumuckl2 pumi = new Pumuckl2(model);
+		return pumi.act();
 	}
 }

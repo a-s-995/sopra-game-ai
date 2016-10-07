@@ -8,6 +8,7 @@ import de.unisaarland.sopra.model.fields.BushField;
 import de.unisaarland.sopra.model.fields.Field;
 import de.unisaarland.sopra.view.Player;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ class Pumuckl2 extends Player {
 	private int myId;
 	private Position closeBush;
 
-//	private Collection<Position> healingFields;
+	private Collection<Position> healingFields;
 	private MyPhase currentPhase = MyPhase.MOVE_TO_ENEMY;
 
 	private enum MyPhase {
@@ -75,10 +76,6 @@ class Pumuckl2 extends Player {
 
 	@Override
 	public Action act() {
-		//wait the first round
-		if(model.getRoundCount() == 1) {
-			return null;
-		}
 		this.myMonster = getModel().getMonster(getActorId());
 		this.myId = myMonster.getId();
 		List<Monster> monsters = model.getMonsters();
@@ -89,8 +86,8 @@ class Pumuckl2 extends Player {
 			}
 		}
 		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
-
 		System.out.println("currentPhase:" + currentPhase);
+
 		return handlePhase();
 	}
 
@@ -108,12 +105,30 @@ class Pumuckl2 extends Player {
 			case WAIT:
 				return waitPhase();
 			case ATTACK:
-				return attackPhase();
+				return healPhase();
 			default:
 				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
 				return null;
 
 		}
+	}
+
+	private Action healPhase() {
+		//handleHEAL
+		healingFields = model.getActiveHealingFields();
+		if (!healingFields.isEmpty()) {
+			Position healingField = closestHealingField();
+			PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
+			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
+				return healMove.getAttack();
+			}
+			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
+					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
+					&& (model.getEnergy(enemyId) > myMonster.getEnergy()))) {
+				return healMove.getMoveAct();
+			}
+		}
+		return attackPhase();
 	}
 
 	/**
@@ -127,11 +142,11 @@ class Pumuckl2 extends Player {
 		//changes the phase when at enemy
 		PlanMoveEnemy move = new PlanMoveEnemy(model, myId, enemyId);
 		if ((model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition()) == 1)) {
-			if (myMonster.getEnergy() >= 250) {
+			if(myMonster.getEnergy() >= 250) {
 				return move.getAttack();
 			}
 			//are there bushes?
-			// TODO: 03.10.16 wenn bereits auf heilfeld, zur attackphase 
+			//bushFields.isEmpty()
 			if (!bushes()) {
 				System.out.println("there are no bushes");
 				setCurrentPhase(MyPhase.ATTACK);
@@ -212,7 +227,7 @@ class Pumuckl2 extends Player {
 		//the initial distance, the bushField has to have at least the same distance
 		int distance = 8;
 		for (Position position : bushFields) {
-			if (position.getDistanceTo(myMonster.getPosition()) <= distance) {
+			if (position.getDistanceTo(myMonster.getPosition()) < distance) {
 				distance = position.getDistanceTo(myMonster.getPosition());
 				nearest = position;
 			}
@@ -220,111 +235,17 @@ class Pumuckl2 extends Player {
 		return nearest;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		/*private Action healPhase() {
-		//handleHEAL
-		healingFields = model.getActiveHealingFields();
-		if (!healingFields.isEmpty()) {
-			Position healingField = closestHealingField();
-			PlanHeal healMove = new PlanHeal(model, myId, enemyId, healingField);
-			if (((healingField.equals(myMonster.getPosition())) && (myMonster.getHealth() < 80))) {
-				return healMove.getAttack();
-			}
-			if (model.getHealth(enemyId) > myMonster.getHealth() + 30 || myMonster.getHealth() < 33
-					|| ((model.getHealth(enemyId) > myMonster.getHealth() + 22)
-					&& (model.getEnergy(enemyId) == 1000))) {
-				return healMove.getMoveAct();
-			}
-		}
-		return attackPhase();
-	}*/
 	//// TODO: 27.09.16 change in healing field, that has  the minimum of costs to reach, ANSEHEN!!
-	/*private Position closestHealingField() {
+	private Position closestHealingField() {
 		Position nearest = null;
-		int distance = 100;
+		int distance = 50;
 		for (Position position : healingFields) {
-			if (position.getDistanceTo(myMonster.getPosition()) < distance) {
-				distance = position.getDistanceTo(myMonster.getPosition());
+			if (position.getDistanceTo(model.getMonster(getActorId()).getPosition()) < distance) {
+				distance = position.getDistanceTo(model.getMonster(getActorId()).getPosition());
 				nearest = position;
 			}
 		}
 		return nearest;
-	}*/
+	}
 
 }

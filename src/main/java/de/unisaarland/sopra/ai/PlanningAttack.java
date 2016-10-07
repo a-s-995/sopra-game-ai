@@ -2,6 +2,7 @@ package de.unisaarland.sopra.ai;
 
 import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
+import de.unisaarland.sopra.actions.MoveAction;
 import de.unisaarland.sopra.actions.SlashAttack;
 import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.model.Model;
@@ -23,7 +24,7 @@ class PlanningAttack extends Planning {
 	private Action actionAttack;
 	private Set<Position> bushFields = new HashSet<>();
 
-	PlanningAttack(Model model, int myID, int enemyId, Set<Position> bushFields) {
+	public PlanningAttack(Model model, int myID, int enemyId, Set<Position> bushFields) {
 		super(model, myID, enemyId);
 		actionAttack = null;
 		this.bushFields = bushFields;
@@ -40,7 +41,6 @@ class PlanningAttack extends Planning {
 			actionAttack = getAttack();
 			//is there a bush around my monster while attacking, move at the end on the bush
 			if (myMonster.getEnergy() <= 250 && !(model.getField(myMonster.getPosition()) instanceof BushField)) {
-				// TODO: 03.10.16 bushfields kann leer sein
 				Action bush = bushArround();
 				if (bush != null) {
 					actionAttack = bush;
