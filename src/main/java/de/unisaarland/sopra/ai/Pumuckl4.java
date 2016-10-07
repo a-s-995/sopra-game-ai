@@ -58,7 +58,7 @@ class Pumuckl4 extends Player {
 //		System.out.println("\n");
 		// TODO: 05.10.16  wait the first 2 rounds , dran denken in moveToEnemy den roundcount:D
 		if (model.getRoundCount() == 1) {
-			return null;
+			return getAttack();
 		}
 
 		myId = getActorId();
@@ -83,7 +83,7 @@ class Pumuckl4 extends Player {
 				}
 			}
 		}
-//		System.out.println("currentPhase:" + currentPhase);
+		System.out.println("currentPhase:" + currentPhase);
 //		System.out.println("slashhim:" + slashhim);
 //		System.out.println("onceOnField:" + onceOnBestField);
 
@@ -126,7 +126,7 @@ class Pumuckl4 extends Player {
 			return getAttack();
 		}
 		if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 6);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 9);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions = bestDestination.toActionQueue();
 		}
