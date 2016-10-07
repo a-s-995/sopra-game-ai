@@ -42,6 +42,8 @@ class Pumuckl4 extends Player {
 
 	private boolean slashhim = true;
 	private boolean onceOnBestField = true;
+	private boolean nearHeal = true;
+	private boolean nearBestPos = true;
 	private thePhase currentPhase = thePhase.MOVE_TO_ENEMY;
 
 	private enum thePhase {
@@ -143,7 +145,8 @@ class Pumuckl4 extends Player {
 	 * @return an action
 	 */
 	private Action attackPhase() {
-		if (onceOnBestField && (myMonster.getHealth() < 80) && (model.getMonster(myId).getEnergy() == 1000)) {
+		if (onceOnBestField && (myMonster.getHealth() < 80) && (model.getMonster(myId).getEnergy() == 1000)
+				&& nearBestPos) {
 			onceOnBestField = false;
 			Collection<Position> bushAndHeal = new LinkedList<>();
 			bushAndHeal.addAll(model.getActiveHealingFields());
@@ -163,7 +166,8 @@ class Pumuckl4 extends Player {
 				}
 			}
 		}
-		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
+		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000
+				&& nearHeal) {
 			if (!model.getActiveHealingFields().isEmpty()) {
 				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11);
 				BestDestination justHeal = new BestDestination(dijkstra.getHashMap(), model,
@@ -171,7 +175,7 @@ class Pumuckl4 extends Player {
 				actions.clear();
 				actions = justHeal.toActionQueueNotBeside();
 				healingFieldPos = justHeal.getDestination();
-				if (!(model.getMonster(enemyId).getPosition().equals(bestDestPos))) {
+				if ((!(model.getMonster(enemyId).getPosition().equals(bestDestPos)))) {
 					this.currentPhase = thePhase.HEAL;
 					return healPhase();
 				}
@@ -188,7 +192,7 @@ class Pumuckl4 extends Player {
 		}
 		//else move to enemy, but not if you already moved back
 		else if (model.getMonster(myId).getEnergy() == 1000) {
-			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 5);
+			Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 7);
 			BestDestination bestDestination = new BestDestination(dijkstra.getHashMap(), model, enemyId);
 			actions.clear();
 			actions = bestDestination.toActionQueue();
@@ -203,7 +207,13 @@ class Pumuckl4 extends Player {
 			howLong = 2;
 			return waitPhase();
 		}
-		return actions.poll();
+		Action actionPoll = actions.poll();
+		if (actionPoll != null) {
+			return actions.poll();
+		}
+		nearBestPos = false;
+		this.currentPhase = thePhase.ATTACK;
+		return attackPhase();
 	}
 
 
@@ -213,7 +223,13 @@ class Pumuckl4 extends Player {
 			howLong = 3;
 			return waitPhase();
 		}
-		return actions.poll();
+		Action actionPoll = actions.poll();
+		if (actionPoll != null) {
+			return actions.poll();
+		}
+		nearHeal = false;
+		this.currentPhase = thePhase.ATTACK;
+		return attackPhase();
 	}
 
 	/**
