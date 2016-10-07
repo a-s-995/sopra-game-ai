@@ -191,7 +191,7 @@ class Pumuckl4 extends Player {
 				}
 			}
 		}
-		if (myMonster.getHealth() < 60 && model.getMonster(myId).getEnergy() == 1000) {
+		if (myMonster.getHealth() < 40 && model.getMonster(myId).getEnergy() == 1000) {
 			if (!model.getActiveHealingFields().isEmpty()) {
 				Dijkstra dijkstra = new Dijkstra(this.model, this.myId, 11, update);
 				BestDestination justHeal = new BestDestination(dijkstra.getHashMap(), model,
