@@ -27,14 +27,16 @@ class Dijkstra {
 	private Model model;
 	private Model copyModel;
 	private int myId;
+	private int deepnessAlgortighm;
 	//	private int enemyId;
 	private Set<Position> positions = new HashSet<>();
 	private Map<Position, Path> hash = new HashMap<>();
 
 
-	Dijkstra(Model model, int myId) {
+	Dijkstra(Model model, int myId, int deepnessAlgortighm) {
 		this.model = model;
 		this.myId = myId;
+		this.deepnessAlgortighm = deepnessAlgortighm;
 		//initialize positions
 		for (int i = 0; i < this.model.getBoard().getWidth(); i++) {
 			for (int j = 0; j < this.model.getBoard().getHeight(); j++) {
@@ -49,7 +51,8 @@ class Dijkstra {
 		//go trough all positions
 		while (!positions.isEmpty()) {
 			int next = minDist();
-			if (next == 6) {
+			// TODO: 06.10.16  add a place for the 6, an integer in constructor 
+			if (next == deepnessAlgortighm) {
 				break;
 			}
 			//ein reihen durchlauf
@@ -86,11 +89,15 @@ class Dijkstra {
 	 */
 	private void initialize() {
 		Position start = model.getMonster(myId).getPosition();
-		for (Position pos : positions) {
+		Iterator<Position> iterator = positions.iterator();
+		while (iterator.hasNext()) {
+			Position pos = iterator.next();
+			if (pos.getDistanceTo(model.getMonster(myId).getPosition()) > 10) {
+				iterator.remove();
+			}
 			Path path = new Path(pos, 16384);
 			hash.put(pos, path);
 		}
-
 		//set the costs of startPosition to 0
 		hash.get(start).setCost(0);
 		positions.remove(start);

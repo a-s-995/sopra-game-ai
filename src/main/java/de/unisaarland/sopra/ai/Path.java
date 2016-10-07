@@ -51,11 +51,11 @@ class Path {
 		this.cost = cost;
 	}
 
-	public void setThePath(Path thePath) {
+	void setThePath(Path thePath) {
 		this.theLastPath = thePath;
 	}
 
-	public void setLastAction(Action lastAction) {
+	void setLastAction(Action lastAction) {
 		this.lastAction = lastAction;
 	}
 	//new simulate controller a
