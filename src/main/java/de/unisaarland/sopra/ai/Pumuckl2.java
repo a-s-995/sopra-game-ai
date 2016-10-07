@@ -71,7 +71,6 @@ class Pumuckl2 extends Player {
 	Pumuckl2(Model model) {
 		super(model);
 		System.out.println("PUMUCKL2 wird erstellt");
-		this.currentPhase = MyPhase.MOVE_TO_ENEMY;
 	}
 
 	@Override
