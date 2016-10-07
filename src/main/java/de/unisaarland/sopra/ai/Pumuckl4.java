@@ -3,7 +3,6 @@ package de.unisaarland.sopra.ai;
 import de.unisaarland.sopra.Direction;
 import de.unisaarland.sopra.actions.Action;
 import de.unisaarland.sopra.actions.MoveAction;
-import de.unisaarland.sopra.actions.SlashAttack;
 import de.unisaarland.sopra.actions.StabAttack;
 import de.unisaarland.sopra.commands.ActionCommand;
 import de.unisaarland.sopra.commands.Command;
@@ -49,11 +48,11 @@ class Pumuckl4 extends Player {
 	}
 
 
-	private int distanceToEnemy;
+//	private int distanceToEnemy;
 	//id of the enemy
-	private Position closeBush;
+//	private Position closeBush;
 
-	private Collection<Position> healingFields;
+//	private Collection<Position> healingFields;
 	private MyPhase currentPhase2 = MyPhase.MOVE_TO_ENEMY;
 
 	private enum MyPhase {
@@ -373,7 +372,7 @@ class Pumuckl4 extends Player {
 	}
 
 	private Action handleBoredom() {
-		distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
+		//distanceToEnemy = model.getMonster(enemyId).getPosition().getDistanceTo(myMonster.getPosition());
 		System.out.println("currentPhase:" + currentPhase);
 		return handlePhase2();
 	}
@@ -440,12 +439,9 @@ class Pumuckl4 extends Player {
 		switch (currentPhase2) {
 			case MOVE_TO_ENEMY:
 				return moveToEnemyPhase2();
-			case TO_BUSH:
-				return bushPhase2();
-			case WAIT:
-				return waitPhase2();
+
 			case ATTACK:
-				return healPhase2();
+				return attackPhase2();
 			default:
 				System.out.println("WTFFFFF NO PHASE IS SET!!  ERROR ERRROR BIB BIEB BIEB ERROR");
 				return null;
@@ -453,6 +449,7 @@ class Pumuckl4 extends Player {
 		}
 	}
 
+	/*
 	private Action healPhase2() {
 		//handleHEAL
 		healingFields = model.getActiveHealingFields();
@@ -469,7 +466,7 @@ class Pumuckl4 extends Player {
 			}
 		}
 		return attackPhase2();
-	}
+	}*/
 
 	/**
 	 * controlls the moveToEnemy Phase an returns the best Action
@@ -485,9 +482,11 @@ class Pumuckl4 extends Player {
 			if(myMonster.getEnergy() >= 250) {
 				return move.getAttack();
 			}
+			setCurrentPhase2(MyPhase.ATTACK);
+			return null;
 			//are there bushes?
 			//bushFields.isEmpty()
-			if (!bushes()) {
+			/*if (!bushes()) {
 				System.out.println("there are no bushes");
 				setCurrentPhase2(MyPhase.ATTACK);
 				return null;
@@ -502,7 +501,7 @@ class Pumuckl4 extends Player {
 			//bush phase
 			System.out.println("GO TO BUSHPHASE");
 			setCurrentPhase2(MyPhase.TO_BUSH);
-			return null;
+			return null;*/
 		}
 		//the normal case in this phase, move to enemy and maybe attack
 		return move.getMoveAction();
@@ -514,7 +513,7 @@ class Pumuckl4 extends Player {
 	 *
 	 * @return the best Action
 	 */
-	private Action bushPhase2() {
+	/*private Action bushPhase2() {
 		//am i already on the bush? then WaitPhase
 		if (myMonster.getPosition().equals(closeBush)) {
 			if (distanceToEnemy == 1) {
@@ -531,7 +530,7 @@ class Pumuckl4 extends Player {
 		//the normal case
 		PlanMoveBush move = new PlanMoveBush(model, myId, enemyId, closeBush);
 		return move.getMoveAct();
-	}
+	}*/
 
 	/**
 	 * this method waits one round for the enemy on a bushfield and sets on attacking phase
@@ -539,12 +538,12 @@ class Pumuckl4 extends Player {
 	 *
 	 * @return an action
 	 */
-	private Action waitPhase2() {
+	/*private Action waitPhase2() {
 		PlanWaitPhase wait = new PlanWaitPhase(model, myId, enemyId);
 		setCurrentPhase2(MyPhase.ATTACK);
 		return wait.getActionAttacke();
 	}
-
+*/
 	/**
 	 * this method is called in the last phase, the action phase
 	 * myMonster should run to the enemy and attack, and if a bushfield is around him, he should go on the bushfield
@@ -562,7 +561,7 @@ class Pumuckl4 extends Player {
 	 *
 	 * @return the position of the closest bush (to me)
 	 */
-	private Position closestBushToMe() {
+	/*private Position closestBushToMe() {
 		Position nearest = null;
 		//the initial distance, the bushField has to have at least the same distance
 		int distance = 8;
@@ -586,7 +585,7 @@ class Pumuckl4 extends Player {
 			}
 		}
 		return nearest;
-	}
+	}*/
 
 
 }
