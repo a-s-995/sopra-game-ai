@@ -81,15 +81,22 @@ class Pumuckl4 extends Player {
 		myId = getActorId();
 		myMonster = model.getMonster(myId);
 		List<Monster> monsters = model.getMonsters();
+		Collection<Monster> enemies = new LinkedList<>();
 		for (Monster monster : monsters) {
-			if (monster.getId() != getActorId()) {
-				enemyId = monster.getId();
-				break;
+			if (!monster.getTeam().equals(myMonster.getTeam())) {
+				enemies.add(monster);
 			}
 		}
-		if (model.getBoredom() == 2) {
-			this.currentPhase = thePhase.NOT_BOREDOM;
+		int nearest = 10000;
+		for (Monster monster : enemies) {
+			if (monster.getPosition().getDistanceTo(myMonster.getPosition()) < nearest) {
+				enemyId = monster.getId();
+				nearest = monster.getPosition().getDistanceTo(myMonster.getPosition());
+			}
 		}
+		/*if (model.getBoredom() == 2) {
+			this.currentPhase = thePhase.NOT_BOREDOM;
+		}*/
 		//to here, nothing to change
 
 		//send done acting if enemy has less than 29 health, to be the first in next round
