@@ -136,7 +136,7 @@ class Dijkstra {
 			hash.get(to.getCurrent()).setLastAction(to.getLastAction());
 			hash.get(to.getCurrent()).setThePath(to.getThePath());
 //			hash.replace(to.getCurrent(), to);
-//			updateUpdate(to);
+			updateUpdate(to);
 		}
 	}
 
